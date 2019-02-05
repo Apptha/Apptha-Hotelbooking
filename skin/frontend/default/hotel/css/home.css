@@ -1,0 +1,139 @@
+/* 
+    Document   : home
+    Created on : Feb 21, 2013, 6:50:48 AM
+    Author     : Apptha
+    Description: Style only for Home Page
+*/
+
+
+
+
+/* Slideshow (jQuery Cycle) ========================================================================== */
+.slideshow-wrapper { position:relative; width:100%; }
+ul.slideshow { list-style:none outside none; margin:0; padding:0; /* Slideshow: */ position:relative; height:420px; }
+.slideshow .slide { display:block; height:420px; margin: 0 auto !important; /* position: relative !important; */ width: 100%!important; }
+
+/* Navigation */
+.slideshow-wrapper .browse-button { text-decoration:none; text-indent:-999px; overflow:hidden; opacity:0; transition: opacity 300ms ease-in-out; -moz-transition: opacity 300ms ease-in-out; -webkit-transition: opacity 300ms ease-in-out; -o-transition: opacity 300ms ease-in-out; }
+.slideshow-wrapper:hover .browse-button { opacity:1; }
+.slideshow-wrapper .backward { position:absolute; left:10px; top:45%; background: url(../images/slideshow-arrows.png) 0 0 no-repeat; width:50px; height:50px; }
+.slideshow-wrapper .backward:hover { background-position:0 -50px; }
+.slideshow-wrapper .forward { position:absolute; right:10px; top:45%; background:url(../images/slideshow-arrows.png) -50px 0 no-repeat; width:50px; height:50px; }
+.slideshow-wrapper .forward:hover { background-position:-50px -50px; }
+
+/* Navigation goes up (Z-axis) */
+.slideshow-wrapper .browse-button { z-index:50; position: absolute;}
+.slideshow-wrapper .tab-pager { z-index:50; position: absolute; top: 300px;}
+
+/* navigation pager  */ 
+.tab-pager a { float:left; width:20px; height:20px; margin-right:3px; text-align:center; overflow:hidden; text-indent:-999px; }
+
+/* Tab pager: simple gray rounded rectangles */
+.tab-pager.tab-pager-simple a { background-color:#eee; color:#777; -moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px; -moz-box-shadow:inset 0px 1px 1px rgba(0, 0, 0, 0.2); -webkit-box-shadow:inset 0px 1px 1px rgba(0, 0, 0, 0.2); box-shadow:inset 0px 1px 1px rgba(0, 0, 0, 0.2); }
+.tab-pager.tab-pager-simple a.current, /*jQuery Tools*/
+.tab-pager.tab-pager-simple a.activeSlide, /*jQuery Cycle plugin*/
+.tab-pager.tab-pager-simple a:hover { background-color:#ccc; }
+
+/* Tab pager: image background  */
+.tab-pager.tab-pager-img a { background:no-repeat transparent; }
+.tab-pager.tab-pager-img a.current,
+.tab-pager.tab-pager-img a.activeSlide { background-position:0 -30px; }
+.tab-pager.tab-pager-img a:hover { background-position:0 -60px; }
+
+/* Light gray rings */
+.tab-pager.tab-pager-ring-lgray a { background-image:url(../images/tab-pager-ring-lgray.png); }
+
+
+/* Content Part ========================================================================== */
+.main { width: 980px; margin: 0 auto; min-height: 400px; padding: 15px 0 20px; text-align: left; background: #fff; }
+.subtitle, .sub-title{ font-size:23px; color:#333; font-family:'Open Sans Condensed', sans-serif; font-weight:bold; text-transform:uppercase; text-shadow:1px 1px 0 #fff; margin:0; line-height:normal; padding: 0 0 10px; }
+.header_divider{ border-bottom: 0; }
+.col-main{ padding: 0px; border: none;}
+
+
+/* Banner slider ========================================================================== */
+.banner_container{ overflow: hidden; background: url(../images/content.jpg); }
+
+.banner_search { width : 980px; height: 84px; margin: 0 auto 2px; position: relative; background: url(../images/black_pattern.jpg);  overflow: hidden; margin-top: -30px; z-index: 1000; }
+.banner_search .block-search { background: none; padding: 25px; border: 1px solid #444; margin-bottom: 3px; background: url(../images/search_bg.png) repeat-x; }
+.banner_search .block-search .block-title { border:0; margin:0; display: none;}
+.banner_search .block-search .block-content { background: none; }
+.banner_search .block-search .searchInputOl{ display: block; float: left; width: auto; margin-right: 30px; }
+
+.banner_search .block-search .block-content select { width: 220px !important; height: 33px; padding: 5px; background: #333; border: 1px solid #666;  color: #b1a9bb; line-height: 27px; }
+.banner_search .block-search .block-content .search-input{ padding: 7px 10px 9px 7px; border: 1px solid #666; color:#ccc; width: 203px; background: #333 url(../images/room-searchbox-input.png) no-repeat right; cursor: pointer; } 
+.banner_search .block-search .block-content .seachButton button.button {  height: 33px; }
+.banner_search .block-search .block-content p{ margin: 0px; float: right; }
+.banner_search .block-search button.button span{background: #b31f00;
+height: 24px;
+display: block;
+padding: 0 0 8px 4px;}
+.banner_search .block-search button.button span:hover{background: #000;}
+.banner_search .block-search button.button span span {background: #b31f00; height: 24px;display: block; padding: 4px 25px 4px 18px; color: #fff; font: bold 12px Arial;
+line-height: 23px; white-space: nowrap;} 
+.banner_search .block-search button.button span span:hover { background: #000; }
+.banner_search .block-search .validation-failed{ border: 1px dashed #EB340A !important; background: none !important; }
+.banner_search .block-search .validation-advice { clear:both; min-height:13px; margin:-7px 0 0; padding-left:0px; text-align: left; font-size:11px; font-weight:bold; line-height:13px; background:none; color:#eb340a; }
+
+.slider_banner { width: 100%; position: relative; }
+
+
+.slideshow .banner_content{ width: 460px; height: auto; padding: 20px; background: url(../images/black_pattern_trans.png) repeat; position: absolute; z-index: 1000; left: 14.6%; top: 60px; border-bottom: 5px solid #000; }
+.slideshow .banner_content .banner_pname {width: 100%; font-family: arial, helvetica, sans-serif; color: #fff; font-size: 20px; font-weight: bold;  text-align: left;}
+.banner_content .banner_pdes { font: normal normal 12px/18px arial; text-align: left; color: #aaa; }
+.banner_content .banner_more { display: block; width: auto; padding: 5px 10px; background: #b31f00; text-align: center; color: #fff; font-family: arial; float: left; text-decoration: none;}
+.banner_content .banner_more:hover{background: #000;}
+.banner_content .productListPrice{ clear: both; padding: 10px 0; overflow: hidden; }
+.banner_content .list_regular{ display:block; float: left; font: normal normal 16px Arial, Helvetica, sans-serif; color: #999; text-decoration: line-through; padding-right: 10px; margin-bottom: 10px;}
+.banner_content .list_special{ display:block; float: left; font: normal bold 16px Arial, Helvetica, sans-serif; color: #fff; padding-left: 10px; margin-bottom: 10px; }
+.banner_content .regular_alone { display:block; float: left; font: normal bold 16px Arial, Helvetica, sans-serif; color: #fff;  }
+.banner_content .prices_from { display:block; float: left; font: normal normal 16px Arial, Helvetica, sans-serif; color: #fff; padding-right: 10px;  }
+
+/* brand banner */
+.brandslider { width: 950px !important; height: 100px; border: 1px dashed #ddd; border-left: 0px; border-right: 0px; margin:0 auto; background: #f8f8f8;  margin-top: 30px; margin-bottom: 30px;}
+.brandslider .slideshow{ width: 930px !important; height: 100px; padding:0px; margin: 0 auto; clear: both; background: none; overflow: hidden; }
+.brandslider .slideshow ul{ width: 4000px !important;  }
+.brandslider .slideshow { display: block; width: 950px;}
+.brandslider .slideshow li{display: block; width: 150px !important;  float: left; padding: 16px 10px 0px;}
+.brandslider .slideshow .previous{display: block; width: 19px; height: 27px; float: left; background: url(../images/brandslider_arrow.jpg) no-repeat 0 0; margin: 26px 0px 0px; z-index: 1000; position: relative;}
+.brandslider .slideshow .previous:hover{background-position: 0px -27px;}
+.brandslider .slideshow .next{display: block; width: 19px; height: 27px; float: right; background: url(../images/brandslider_arrow.jpg) no-repeat -19px 0px; margin:0px; z-index: 1000; position: relative; margin-top: -40px;}
+.brandslider .slideshow .next:hover{background: url(../images/brandslider_arrow.jpg) no-repeat -19px -27px;}
+.brandslider .slideshow .slideshow-box { width: 950px; float: left; overflow: hidden; margin:0 0 0px; position: relative;}
+
+/* Recently added */
+.newproduct{ padding: 0 20px; }
+.newproduct_price { clear: both; padding: 5px 0; overflow: hidden; }
+.newproduct_price .list_regular{ display:block; float: left; font: normal normal 13px Arial, Helvetica, sans-serif; color: #666; text-decoration: line-through; padding-right: 10px; margin-bottom: 0px;}
+.newproduct_price .list_special{ display:block; float: left; font: normal bold 13px Arial, Helvetica, sans-serif; color: #000; padding-left: 0px; margin-bottom: 0px;  }
+.newproduct_price .regular_alone { display:block; float: left; font: normal bold 13px Arial, Helvetica, sans-serif; color: #000; margin-bottom: 0px;}
+.newproduct_price .prices_from { display:block; float: left; font: normal normal 13px Arial, Helvetica, sans-serif; color: #666; margin-bottom: 0px; padding-right: 5px; }
+
+/* Top Destinations */
+.popular{  margin-top: 25px; padding: 0 20px; }
+
+/* View Type: Grid */
+.products-grid {  position:relative; }
+.products-grid.last { border-bottom:0; }
+.products-grid li.item { float:left; width:223px; margin-right: 15px;  margin-bottom: 20px; border-bottom: 1px solid #d8d8d8; height:320px; position: relative;}
+.products-grid li.item:hover{ border-bottom: 1px solid #C51C1C; }
+.products-grid li.last { margin-right: 0px; }
+.products-grid .product-image { display:block; margin:0; padding: 0; }
+.products-grid .product-image img{ display:block; width: 223px; height: 135px; margin: 0; border-bottom: 3px solid #000; } 
+.products-grid .product-name { /*min-height:2.7em;*/ margin: 0; font-weight: bold; font-size: 12px; color: #555; padding: 10px 0; height: 38px; }
+.products-grid .product-name a { color:#C51C1C; text-decoration:none; line-height: 18px; text-shadow: 1px 1px 0 white; font-size: 14px; font-weight: normal; }
+.products-grid .product-name a:hover { color:#000; text-decoration:none; line-height: 18px; }
+.products-grid .price-box { margin: 0; padding: 0 ;  }
+.products-grid .availability { line-height:21px; float: left; padding: 5px 12px;  color:#000; background-color:#ddd; -moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px; }
+.products-grid .availability span{color: #000;}
+.products-grid .actions { padding: 10px 0; overflow: hidden; position: absolute;bottom: 0px; width: 100%; }
+
+.products-grid .actions button.button { -webkit-border-fit:lines; /* <- Safari & Google Chrome Fix */  overflow:visible; width:auto; border:0; padding:0; margin:0; background:transparent; cursor:pointer; }
+.products-grid .actions button.button span { background-color:#ddd; float:left; display:block; height:35px; padding:0; line-height:22px; font-size:12px; text-align:center; white-space:nowrap; 	
+                                             color:#555; -moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px; border: none; }
+.products-grid .actions button.button:hover span { /*background-position:0 -105px;*/ background-color:#ccc; color:#333; }
+.products-grid .actions button.button span span { /*background-position:100% 0;*/ height:35px; 	padding:0 10px 0 10px; /* 23 = 8 + 15 */ line-height:35px; }
+
+.regular-price .price { color: #000; font-weight: bold; }
+
+

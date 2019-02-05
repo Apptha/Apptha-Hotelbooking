@@ -1,0 +1,255 @@
+<?php
+/**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+/* @var $this Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Tier */
+?>
+
+<?php $_htmlId      = $this->getElement()->getHtmlId() ?>
+<?php $_htmlClass   = $this->getElement()->getClass() ?>
+<?php $_storeId		= $this->getProduct()->getStoreId() ?>
+<?php $_htmlName    = $this->getElement()->getName() ?>
+<?php $_readonly    = $this->getElement()->getReadonly() ?>
+<?php $_multiWebsite= 0 && !Mage::app()->isSingleStoreMode() ?>
+
+<tr>
+    <td class="label"><?php echo $this->getElement()->getLabel() ?></td>
+    <td colspan="10" class="grid excludeddays" style="position:static;">
+    <table cellspacing="0" class="data border" id="excludeddays_table">
+        <?php if (1||$_multiWebsite): ?>
+        <col width="135" />
+        <?php endif; ?>
+        <col width="120" />
+        <col width="260" />
+        <?php if (!$_storeId): ?><col/><?php endif; ?>
+        <col width="75" />
+        <thead>
+            <tr class="headings">
+                <th <?php if (1 || !$_multiWebsite): ?>style="display:none"<?php endif; ?>><?php echo Mage::helper('sales')->__('Website') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Period type') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Period/Date') ?></th>
+                <th <?php if (!$_storeId): ?>style="display:none"<?php endif; ?>></th>
+                <th class="last" style="width:100%"><?php echo Mage::helper('catalog')->__('Action') ?></th>
+            </tr>
+            <tr id="<?php echo $_htmlId ?>_add_template" class="template no-display">
+                <td <?php if (1|| !$_multiWebsite): ?>style="display:none"<?php endif; ?>>
+                <select disabled="no-template" class="<?php echo $_htmlClass ?> required-entry" name="<?php echo $_htmlName ?>[__index__][website_id]" id="excluded_days_row___index___website">
+                    <?php foreach ($this->getWebsites() as $_websiteId => $_info): ?>
+                    <option value="<?php echo $_websiteId ?>"><?php echo $_info['name'] ?><?php if (!empty($_info['currency'])): ?> [<?php echo $_info['currency'] ?>]<?php endif; ?></option>
+                    <?php endforeach ?>
+                </select>
+                </td>
+					
+                <td style="text-align:right;">
+					<select style="width: 150px;" onchange="changePeriod(this, __index__)" disabled="no-template" class="<?php echo $_htmlClass ?> required-entry" name="<?php echo $_htmlName ?>[__index__][period_type]" id="excluded_days_row___index___period_type">
+						<option value="single"><?php echo $this->__('Single day')?></option>
+						<!-- <option value="recurrent_day"><?php echo $this->__('Recurrent day of week')?></option> -->						
+						<option value="period"><?php echo $this->__('Period, from-to')?></option>
+					</select>
+					
+                </td>
+                <td class="nobr" style="width: 30%; padding-right: 10px">
+                    
+					<?php echo $this->createDateBlock($_htmlName, 'from') ?>
+                                        <div class="clear"></div>
+                                        <div style="margin-bottom: 5px;width: 100%; height: 1px;"></div>
+					<span style="display:none;" id="period___index___selwrapper">
+						<?php echo $this->createDateBlock($_htmlName, 'to') ?>
+					</span>
+                                        
+                
+                </td>
+                <td <?php if (!$_storeId): ?>style="display:none"<?php endif; ?>>
+					<input type="checkbox" name="<?php echo $_htmlName ?>[__index__][use_default_value]" id="excluded_days_row___index___use_default_value"/> Use default value
+                </td>
+
+                <td class="last"><input type="hidden" name="<?php echo $_htmlName ?>[__index__][delete]" class="delete" disabled="no-template" value="" /><button title="Delete Period" class="scalable delete icon-btn delete-product-option" onclick="excludedDaysControl.deleteItem(event);return false"><span>Delete</span></button></td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td <?php if (!$_multiWebsite): ?>style="display:none"<?php endif; ?>></td>
+                <td colspan="4" class="a-right"><?php echo $this->getChildHtml('add_button') ?></td>
+            </tr>
+        </tfoot>
+        <tbody id="<?php echo $_htmlId ?>_container">
+        </tbody>
+    </table>
+
+<script type="text/javascript">
+//<![CDATA[
+    var excludedDaysControl = {
+        template : new Template('<tr>' + $('<?php echo $_htmlId ?>_add_template').innerHTML.replace(/__index__/g, '#{index}').replace(/ disabled="?no-template"?/g, '').replace(/ disabled/g, '').replace(/="'([^']*)'"/g, '="$1"') + '</tr>'),
+        itemsCount : 0,
+        defaultStoreId : <?php echo $_storeId;?>,
+        deleteButton: false,
+        addItem  : function () {
+            <?php if($_readonly): ?>
+            if (arguments.length < 5) {
+                return;
+            }
+            <?php endif; ?>
+            data = {};
+            data.store_id = <?php echo $_storeId;?>;
+            data.period_type = 'single';
+            data.date = '';
+            data.period_dow = 1;
+            data.index = this.itemsCount++;
+            if(arguments.length >= 5) {
+                data.store_id = parseInt(arguments[0]);
+                data.period_type      = arguments[1];
+				
+                data.period_from        = arguments[2];
+                data.period_to        = arguments[3];
+				data.period_dow = arguments[4]; 
+				
+            }
+
+            Element.insert($('<?php echo $_htmlId ?>_container'), {'bottom':this.template.evaluate(data)});
+            $('excluded_days_row_'+data.index+'_period_type').setValue(data.period_type, 1);
+            $('excluded_days_row_'+data.index+'_website').setValue(data.website_id);
+            $('excluded_days_row_'+data.index+'_period_from').setValue(data.period_from);
+            $('excluded_days_row_'+data.index+'_period_to').setValue(data.period_to);
+            
+            $('excluded_days_row_'+data.index+'_use_default_value').setValue(data.store_id == 0);
+			$('excluded_days_row_'+data.index+'_recurrent_day').setValue(data.period_dow);
+            if(data.store_id && (typeof arguments[4] == 'undefined')){
+				$($('excluded_days_row_'+data.index+'_use_default_value').parentNode).style.visibility='hidden';
+			}
+            
+            fireChangeEvt($('excluded_days_row_'+data.index+'_period_type'))
+           
+            $('excluded_days_row_'+data.index+'_use_default_value').onclick = function(){
+				if(this.checked){
+					$(this.parentNode.parentNode).select('input', 'select', 'button')
+						.each(excludedDaysControl.disableElement);
+				}else{
+					$(this.parentNode.parentNode).select('input', 'select', 'button')
+						.each(excludedDaysControl.enableElement);
+				}
+			}
+
+			if(!data.store_id && parseInt(this.defaultStoreId)){
+				 $($('excluded_days_row_'+data.index+'_use_default_value').parentNode.parentNode)
+						.select('input', 'select', 'button')
+						.each(excludedDaysControl.disableElement);
+						
+			}
+			
+			
+            
+            <?php if ($_readonly): ?>
+            $('<?php echo $_htmlId ?>_container').select('input', 'select')
+                .each(this.disableElement);
+            $('<?php echo $_htmlId ?>_container').up('table').select('button')
+                .each(this.disableElement);
+            <?php endif; ?>
+            
+          
+            // Setup calendar
+            Calendar.setup({
+                inputField  : "excluded_days_row_"+data.index+"_period_from",
+                ifFormat    : "<?php echo Mage::app()->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT)?>",
+                button      : "excluded_days_row_"+data.index+"_period_from_trig",
+                align       : "Bl",
+                singleClick : true
+            });
+             Calendar.setup({
+                inputField  : "excluded_days_row_"+data.index+"_period_to",
+                ifFormat    : "<?php echo Mage::app()->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT)?>",
+                button      : "excluded_days_row_"+data.index+"_period_to_trig",
+                align       : "Bl",
+                singleClick : true
+            });           
+             
+
+        },
+        disableElement: function(elem) {
+            if(elem.type == 'checkbox') return;
+            elem.disabled = true;
+            elem.addClassName('disabled');
+        },
+        enableElement: function(elem) {
+            elem.disabled = false
+            elem.removeClassName('disabled');
+        },       
+        deleteItem : function(event) {
+            var tr = Event.findElement(event, 'tr');
+            if (tr) {
+                Element.select(tr, '.delete').each(function(elem){elem.value='1'});
+                Element.select(tr, ['input', 'select']).each(function(elem){elem.hide()});
+                Element.hide(tr);
+                Element.addClassName(tr, 'no-display template');
+            }
+        }
+    }
+    
+    var changePeriod = function(el, index){
+		//alert($F(el));
+		if($F(el) == 'period'){// || $F(el) == 'recurrent_period'
+			$('period_'+index+'_selwrapper').show()
+			$('excluded_days_row_'+index+'_recurrent_day').hide();
+			$('excluded_days_row_'+index+'_period_from').show();
+			$('excluded_days_row_'+index+'_period_from_trig').show();
+		}/*else if ($F(el) == 'recurrent_day') {
+			$('excluded_days_row_'+index+'_recurrent_day').show();
+			$('excluded_days_row_'+index+'_period_from').hide();
+			$('excluded_days_row_'+index+'_period_from_trig').hide();
+			$('period_' + index + '_selwrapper').hide()
+			
+		}*/else {
+			$('period_' + index + '_selwrapper').hide()
+			$('excluded_days_row_'+index+'_recurrent_day').hide();
+			$('excluded_days_row_'+index+'_period_from').show();
+			$('excluded_days_row_'+index+'_period_from_trig').show();			
+		}
+	}
+    
+    <?php foreach ($this->getValues() as $_item): 
+    
+    	$dow = new Zend_Date($_item['period_from'], 'Y-MM-dd');
+    
+//		$_item['period_from'] = $this->formatDate($_item['period_from']);
+//		$_item['period_to'] = $this->formatDate($_item['period_to']);
+		 $fromDate = date("m/d/y", strtotime($_item['period_from']));
+                 $toDate = date("m/d/y", strtotime($_item['period_to']));
+		
+              $_item['period_from'] = $fromDate;
+               $_item['period_to'] = $toDate;
+		
+		$dow = $dow->toArray();
+		$dow = $dow['weekday'];
+		
+    ?>
+	
+	
+	
+    excludedDaysControl.addItem('<?php echo $_item['store_id'] ?>', '<?php echo $_item['period_type'] ?>', '<?php echo $_item['period_from']?>',  '<?php echo $_item['period_to']?>', true, '<?php echo $dow?>');
+    <?php endforeach; ?>
+    <?php if ($_readonly): ?>
+        $('<?php echo $_htmlId ?>_container').up('table').select('button')
+            .each(excludedDaysControl.disableElement);
+    <?php endif; ?>
+//]]>
+	
+	function fireChangeEvt(obj){
+			
+			if(typeof document.createEvent !== 'undefined'){
+				var e = document.createEvent('HTMLEvents');
+				e.initEvent('change', false, false);
+				obj.dispatchEvent(e);
+			}else{
+				obj.fireEvent('onchange')
+			}
+		}
+	
+
+</script>
+
+
+
+</td>
+</tr>
+

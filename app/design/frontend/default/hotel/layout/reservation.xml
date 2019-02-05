@@ -1,0 +1,515 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout version="0.1.0">
+
+    <default>
+        <remove name="home.reports.product.viewed"></remove>   
+        <reference name="top.menu">
+            <block type="reservation/navigation" name="reservation.topnav" template="reservation/navigation/top.phtml"/>
+            
+        </reference>
+        
+        <reference name="cart_sidebar">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>checkout/cart_item_renderer</block>
+                <template>reservation/checkout/cart/sidebar/default.phtml</template>
+            </action>
+        </reference>
+       
+    </default>
+    <customer_account>
+        <!-- Mage_Review -->
+        <reference name="customer_account_navigation">
+<!--            <action method="addLink" translate="label" module="sales"><name>My orders</name><path>sales/order/history</path><label>My Hotel Orders</label></action>-->
+            
+            <action method="addLink" translate="label" module="review"><name>reviews</name><path>review/customer</path><label>My Hotel Reviews</label></action>
+            <action method="addLink" translate="label" module="tag"><name>tags</name><path>tag/customer/</path><label>My Hotel Tags</label></action>
+            
+        </reference>
+
+    </customer_account>
+    
+    <reservation_index_index>
+        <remove name="left.newsletter"/>
+        <remove name="left.permanent.callout"/>
+        <remove name="right.permanent.callout"/>
+        <remove name="cart_sidebar"/>
+        <remove name="catalog.compare.sidebar"/>
+        <remove name="right.poll"/>
+        <reference name="head">
+            <action method="addCss">
+                <script>apptha_reservation/css/reservation.css</script>
+            </action>
+            <action method="addCss">
+                <script>apptha_reservation/css/ui-lightness/jquery-ui-1.10.0.custom.css</script>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+            
+        </reference>
+        
+        <reference name="left">
+            <remove name="tags_popular"/>
+            <block type="reservation/hotel_search" name="reservation.search" template="reservation/hotel/search.phtml">
+            </block>
+            
+        </reference>
+        <reference name="content">
+            <block type="reservation/hotel_list" name="reservation.hotel" template="reservation/hotel/list.phtml">
+            </block>
+        </reference>
+    </reservation_index_index>
+        
+    <reservation_hotel_view>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-right.phtml</template>
+            </action>
+        </reference>
+        <reference name="head">
+
+            <action method="addCss">
+                <script>apptha_reservation/css/reservation.css</script>
+            </action>
+
+            <action method="addCss">
+                <script>apptha_reservation/css/ui-lightness/jquery-ui-1.10.0.custom.css</script>
+            </action>	
+            <action method="addCss">
+                <stylesheet>apptha_reservation/source/jquery.fancybox.css</stylesheet>
+            </action>        
+            <action method="addCss">
+                <stylesheet>apptha_reservation/source/helpers/jquery.fancybox-buttons.css</stylesheet>
+            </action>
+            <action method="addJs">
+                <script>mage/adminhtml/loader.js</script>
+            </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>apptha_reservation/source/jquery.fancybox.js</name>
+            </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>apptha_reservation/source/helpers/jquery.fancybox-buttons.js</name>
+            </action>
+            <action method="addJs">
+                <script>apptha_reservation/hotel_product.js</script>
+            </action>	
+        </reference>
+        <reference name="content">
+            <block type="reservation/hotel_view" name="reservation.hotel" template="reservation/hotel/view.phtml">
+                
+                <block type="catalog/product_view_media" name="product.info.media" as="media" template="reservation/hotel/view/media.phtml"/>
+                <block type="core/text_list" name="alert.urls" as="alert_urls" translate="label">
+                    <label>Alert Urls</label>
+                </block>
+
+                <block type="catalog/product_view_additional" name="product.info.additional" as="product_additional_data" />
+                
+                <block type="catalog/product_view_description" name="product.description" as="description" template="catalog/product/view/description.phtml">
+                    <action method="addToParentGroup">
+                        <group>detailed_info</group>
+                    </action>
+                </block>
+                <block type="catalog/product_view_attributes" name="product.attributes" as="additional" template="catalog/product/view/attributes.phtml">
+                    <action method="addToParentGroup">
+                        <group>detailed_info</group>
+                    </action>
+                </block>
+                
+                <block type="page/html_pager" name="product_review_list.toolbar"   />
+                <block type="core/template" name="product_review_list.count" template="review/product/view/count.phtml" />
+                <block type="review/product_view_list" name="product.info.product_additional_data" as="product_additional_data_review" template="reservation/hotel/view/list.phtml">
+                        
+                    <block type="review/form" name="product.review.form" as="review_form">
+                        <block type="page/html_wrapper" name="product.review.form.fields.before" as="form_fields_before" translate="label">
+                            <label>Review Form Fields Before</label>
+                            <action method="setMayBeInvisible">
+                                <value>1</value>
+                            </action>
+                        </block>
+                    </block>
+                </block>
+                <block type="reservation/hotel_view" name="product.info.options.wrapper" as="product_options_wrapper" template="catalog/product/view/options/wrapper.phtml" translate="label">
+                    <label>Info Column Options Wrapper</label>
+                    <block type="core/template" name="options_js" template="catalog/product/view/options/js.phtml"/>
+                    <block type="catalog/product_view_options" name="product.info.options" as="product_options" template="reservation/hotel/view/options.phtml">
+                        <action method="addOptionRenderer">
+                            <type>text</type>
+                            <block>catalog/product_view_options_type_text</block>
+                            <template>catalog/product/view/options/type/text.phtml</template>
+                        </action>
+                        <action method="addOptionRenderer">
+                            <type>file</type>
+                            <block>catalog/product_view_options_type_file</block>
+                            <template>catalog/product/view/options/type/file.phtml</template>
+                        </action>
+                        <action method="addOptionRenderer">
+                            <type>select</type>
+                            <block>catalog/product_view_options_type_select</block>
+                            <template>catalog/product/view/options/type/select.phtml</template>
+                        </action>
+                        <action method="addOptionRenderer">
+                            <type>date</type>
+                            <block>catalog/product_view_options_type_date</block>
+                            <template>catalog/product/view/options/type/date.phtml</template>
+                        </action>
+                    </block>
+<!--                 <block type="core/html_calendar" name="html_calendar" as="html_calendar" template="page/js/calendar.phtml"/> -->
+                </block>
+                <block type="reservation/hotel_view" name="product.info.options.wrapper.bottom" as="product_options_wrapper_bottom" template="catalog/product/view/options/wrapper/bottom.phtml" translate="label">
+                    <label>Bottom Block Options Wrapper</label>
+                    <action method="insert">
+                        <block>product.tierprices</block>
+                    </action>
+                    <block type="catalog/product_view" name="product.clone_prices" as="prices" template="catalog/product/view/price_clone.phtml"/>
+                    <action method="append">
+                        <block>product.info.addtocart</block>
+                    </action>
+                    <action method="append">
+                        <block>product.info.addto</block>
+                    </action>
+                </block>
+
+                <block type="core/template_facade" name="product.info.container1" as="container1">
+                    <action method="setDataByKey">
+                        <key>alias_in_layout</key>
+                        <value>container1</value>
+                    </action>
+                    <action method="setDataByKeyFromRegistry">
+                        <key>options_container</key>
+                        <key_in_registry>product</key_in_registry>
+                    </action>
+                    <action method="append">
+                        <block>product.info.options.wrapper</block>
+                    </action>
+                    <action method="append">
+                        <block>product.info.options.wrapper.bottom</block>
+                    </action>
+                </block>
+
+                <block type="core/template_facade" name="product.info.container2" as="container2">
+                    <action method="setDataByKey">
+                        <key>alias_in_layout</key>
+                        <value>container2</value>
+                    </action>
+                    <action method="setDataByKeyFromRegistry">
+                        <key>options_container</key>
+                        <key_in_registry>product</key_in_registry>
+                    </action>
+                    <action method="append">
+                        <block>product.info.options.wrapper</block>
+                    </action>
+                    <action method="append">
+                        <block>product.info.options.wrapper.bottom</block>
+                    </action>
+                </block>
+                <action method="unsetCallChild">
+                    <child>container1</child>
+                    <call>ifEquals</call>
+                    <if>0</if>
+                    <key>alias_in_layout</key>
+                    <key>options_container</key>
+                </action>
+                <action method="unsetCallChild">
+                    <child>container2</child>
+                    <call>ifEquals</call>
+                    <if>0</if>
+                    <key>alias_in_layout</key>
+                    <key>options_container</key>
+                </action>
+            </block>        
+        </reference>
+        <reference name="right">
+            <block type="catalog/product_list_related" name="catalog.product.related" before="-" template="catalog/product/list/related.phtml"/>
+            <block type="tag/product_list" name="product_tag_list" before="-" template="tag/list.phtml" />
+        </reference>
+    </reservation_hotel_view>
+
+    <PRODUCT_TYPE_hotel translate="label" module="reservation">
+        <label>Catalog Product View (Hotel)</label>
+        <reference name="hotel.info">
+            <block type="reservation/hotel_view_type_hotel" name="hotel.info.hotel" as="hotel_type_data" template="reservation/hotel/view/type/default.phtml">
+                <block type="core/text_list" name="hotel.info.hotel.extra" as="hotel_type_data_extra" translate="label">
+                    <label>Hotel Extra Info</label>
+                </block>
+            </block>
+        </reference>
+    </PRODUCT_TYPE_hotel>
+    
+    <sales_order_view>
+        <reference name="order_items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_view>
+    
+    <sales_order_invoice>
+        <reference name="invoice_items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/invoice/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_invoice>
+    <sales_order_shipment>
+        <reference name="shipment_items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/shipment/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_shipment>
+    <sales_order_creditmemo>
+        <reference name="creditmemo_items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/creditmemo/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_creditmemo>
+    
+    <!-- Email Orders -->
+    <sales_email_order_items>
+        <reference name="items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>email/order/items/order/default.phtml</template>
+            </action>
+        </reference>
+    </sales_email_order_items>
+
+    <sales_email_order_invoice_items>
+        <reference name="items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>email/order/items/invoice/default.phtml</template>
+            </action>
+        </reference>
+    </sales_email_order_invoice_items>
+
+    <sales_email_order_shipment_items>
+        <reference name="items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>email/order/items/shipment/default.phtml</template>
+            </action>
+        </reference>
+    </sales_email_order_shipment_items>
+
+    <sales_email_order_creditmemo_items>
+        <reference name="items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>email/order/items/creditmemo/default.phtml</template>
+            </action>
+        </reference>
+    </sales_email_order_creditmemo_items>
+
+<!-- Orders details at customer account -->
+    <sales_order_printinvoice>
+        <reference name="sales.order.print.invoice">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/invoice/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_printinvoice>
+    <sales_order_printcreditmemo>
+        <reference name="sales.order.print.creditmemo">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/creditmemo/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_printcreditmemo>
+    <sales_order_printshipment>
+        <reference name="sales.order.print.shipment">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/shipment/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_printshipment>
+    <sales_order_print>
+        <reference name="sales.order.print">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/sales_order_items_renderer_default</block>
+                <template>sales/order/items/renderer/default.phtml</template>
+            </action>
+        </reference>
+    </sales_order_print>
+    <checkout_cart_index>
+        <reference name="head">
+            <action method="addCss">
+                <script>apptha_reservation/css/reservation.css</script>
+            </action>
+        </reference>
+        <reference name="checkout.cart">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/checkout_cart_item_renderer</block>
+                <template>reservation/checkout/cart/item/default.phtml</template>
+            </action>
+<!--            <block type="checkout/cart_crosssell" name="checkout.cart.crosssell" as="crosssell" template="reservation/checkout/cart/crosssell.phtml"/>-->
+        </reference>    
+    </checkout_cart_index>
+    
+    <!--
+Review Page of Onepage Checkout 
+-->
+    
+    <checkout_onepage_review>
+        <reference name="root">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/checkout_cart_item_renderer</block>
+                <template>checkout/onepage/review/item.phtml</template>
+            </action>
+        </reference>
+    </checkout_onepage_review>
+
+    <checkout_multishipping_addresses>
+        <reference name="checkout_addresses">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/checkout_cart_item_renderer</block>
+                <template>checkout/multishipping/item/default.phtml</template>
+            </action>
+        </reference>
+    </checkout_multishipping_addresses>
+
+    <checkout_multishipping_shipping>
+        <reference name="checkout_shipping">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/checkout_cart_item_renderer</block>
+                <template>checkout/multishipping/item/default.phtml</template>
+            </action>
+        </reference>
+        <reference name="checkout_billing_items">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/checkout_cart_item_renderer</block>
+                <template>checkout/multishipping/item/default.phtml</template>
+            </action>
+        </reference>
+    </checkout_multishipping_shipping>
+
+    <checkout_multishipping_overview>
+        <reference name="checkout_overview">
+            <action method="addItemRender">
+                <type>hotel</type>
+                <block>reservation/checkout_cart_item_renderer</block>
+                <template>checkout/multishipping/item/default.phtml</template>
+            </action>
+        </reference>
+    </checkout_multishipping_overview>
+    
+    <catalogsearch_result_index translate="label">
+        <reference name="search_result_list">
+            <action method="setTemplate">
+                <template>reservation/hotel/list.phtml</template>
+            </action>           
+        </reference>
+        
+    </catalogsearch_result_index>
+    
+    <catalog_category_default translate="label">
+        <reference name="product_list">
+            <action method="setTemplate">
+                <template>reservation/hotel/list.phtml</template>
+            </action>
+        </reference>
+        
+    </catalog_category_default>
+   
+    <catalog_product_compare_index translate="label">
+        <label>Catalog Product Compare List</label>
+        <!-- Mage_Catalog -->
+        <reference name="root">
+            <action method="setTemplate"><template>page/popup.phtml</template></action>
+        </reference>
+        <reference name="head">
+            <action method="addJs"><script>scriptaculous/scriptaculous.js</script></action>
+            <action method="addJs"><script>varien/product.js</script></action>
+        </reference>
+        <reference name="catalog.compare.list">
+         <action method="setTemplate">
+                <template>reservation/hotel/compare/list.phtml</template>
+            </action>
+        </reference>    
+<!--        <reference name="content">
+            <block type="catalog/product_compare_list" name="catalog.compare.list" template="catalog/product/compare/list.phtml"/>
+        </reference>-->
+    </catalog_product_compare_index>
+    
+    <wishlist_index_index translate="label">
+        <reference name="customer.wishlist.item.cart"> 
+            <action method="setTemplate" translate="title">              
+                <template>reservation/wishlist/item/column/cart.phtml</template>
+            </action>
+        </reference>
+        <reference name="my.account.wrapper">
+            <block type="wishlist/customer_wishlist" name="customer.wishlist" template="wishlist/view.phtml">
+                <action method="setTitle" translate="title">
+                    <title>My Wishlist</title>
+                </action>
+                <block type="wishlist/customer_wishlist_items" name="customer.wishlist.items" as="items" template="wishlist/item/list.phtml">
+                    <block type="wishlist/customer_wishlist_item_column_image" name="customer.wishlist.item.image" template="wishlist/item/column/image.phtml" />
+                    <block type="wishlist/customer_wishlist_item_column_comment" name="customer.wishlist.item.info" template="wishlist/item/column/info.phtml">
+                        <action method="setTitle" translate="title">
+                            <title>Hotel Details and Comment</title>
+                        </action>
+                    </block>
+                    <block type="wishlist/customer_wishlist_item_column_cart" name="customer.wishlist.item.cart" template="wishlist/item/column/cart.phtml">
+                        <action method="setTitle" translate="title">
+                            <title>Add to Cart</title>
+                        </action>
+                        <block type="wishlist/customer_wishlist_item_options" name="customer.wishlist.item.options" />
+                    </block>
+                    <block type="wishlist/customer_wishlist_item_column_remove" name="customer.wishlist.item.remove" template="wishlist/item/column/remove.phtml" />
+                </block>
+                <block type="core/text_list" name="customer.wishlist.buttons" as="control_buttons">
+                    <block type="wishlist/customer_wishlist_button" name="customer.wishlist.button.share" template="wishlist/button/share.phtml" />
+                    <block type="wishlist/customer_wishlist_button" name="customer.wishlist.button.toCart" template="wishlist/button/tocart.phtml" />
+                    <block type="wishlist/customer_wishlist_button" name="customer.wishlist.button.update" template="wishlist/button/update.phtml" />
+                </block>
+            </block>
+        </reference>
+        <remove name="customer.wishlist.button.toCart"></remove>             
+    </wishlist_index_index>
+     <customer_logged_in>
+        <reference name="right">
+            <remove name="sale.reorder.sidebar"/>
+            <remove name="cart_sidebar"/>
+        </reference>
+        
+    </customer_logged_in>
+    
+</layout>
+

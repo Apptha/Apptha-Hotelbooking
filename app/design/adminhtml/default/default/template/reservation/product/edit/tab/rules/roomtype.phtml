@@ -1,0 +1,266 @@
+<?php
+/**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+/* @var $this Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Tier */
+?>
+
+<?php $_htmlId      = $this->getElement()->getHtmlId() ?>
+<?php $_htmlClass   = $this->getElement()->getClass() ?>
+<?php $_storeId		= $this->getProduct()->getStoreId() ?>
+<?php $_htmlName    = $this->getElement()->getName() ?>
+<?php $_readonly    = $this->getElement()->getReadonly() ?>
+<?php $_multiWebsite= 0 && !Mage::app()->isSingleStoreMode() ?>
+
+
+<tr>
+    <td class="label"><?php echo $this->getElement()->getLabel() ?></td>
+    <td colspan="10" class="grid roomtypes" style="position:static;">
+    <table cellspacing="0" class="data border" id="roomtypes_table">
+        <?php if (1||$_multiWebsite): ?>
+        <col width="135" />
+        <?php endif; ?>
+        <col width="120" />
+        <col width="260" />
+        <?php if (!$_storeId): ?><col/><?php endif; ?>
+        <col width="75" />
+        <thead>
+            <tr class="headings">
+                <th <?php if (1 || !$_multiWebsite): ?>style="display:none"<?php endif; ?>><?php echo Mage::helper('sales')->__('Website') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Room type') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Price(per night)') ?></th>
+               <!-- <th><?php //echo Mage::helper('catalog')->__('Special Price(from)') ?></th>
+                <th><?php //echo Mage::helper('catalog')->__('Special Price(to)') ?></th>-->
+                <th><?php echo Mage::helper('catalog')->__('Inclusions') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Special Price') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Capacity(per room)') ?></th>
+                <th><?php echo Mage::helper('catalog')->__('Rooms available') ?></th>
+                <th style="display:none"><?php echo Mage::helper('catalog')->__('Deal availability') ?></th>
+                <th <?php if (!$_storeId): ?>style="display:none"<?php endif; ?>></th>
+                <th class="last"><?php echo Mage::helper('catalog')->__('Action') ?></th>
+            </tr>
+            <tr id="<?php echo $_htmlId ?>_add_template" class="template no-display">
+                <td <?php if (1|| !$_multiWebsite): ?>style="display:none"<?php endif; ?>>
+                <select disabled="no-template" class="<?php echo $_htmlClass ?> required-entry" name="<?php echo $_htmlName ?>[__index__][website_id]" id="roomtypes_row___index___website">
+                    <?php foreach ($this->getWebsites() as $_websiteId => $_info): ?>
+                    <option value="<?php echo $_websiteId ?>"><?php echo $_info['name'] ?><?php if (!empty($_info['currency'])): ?> [<?php echo $_info['currency'] ?>]<?php endif; ?></option>
+                    <?php endforeach ?>
+                </select>
+                
+                </td>
+				<td style="text-align:right;">
+					<input type="text" name="<?php echo $_htmlName ?>[__index__][room_type]" id="roomtypes_row___index___room_type" class="<?php echo $_htmlClass ?> required-entry validate-emailSender" disabled="no-template" />
+                </td>
+                <td style="text-align:right;">					
+					
+     <input type="text" name="<?php echo $_htmlName ?>[__index__][room_price_per_night]" id="roomtypes_row___index___room_price_per_night" class="<?php echo $_htmlClass ?> required-entry validate-number" disabled="no-template" style="width: 85px !important;" />
+                
+                </td>
+<!--               <td class="nobr">	
+               				
+					
+     <?php //echo $this->createDateBlock($_htmlName, 'from') ?>
+                
+                </td>-->
+                
+<!--                <td class="nobr">					
+					
+     <?php //echo $this->createDateBlock($_htmlName, 'to') ?>
+                
+                </td>-->
+                
+                
+                
+                <td style="text-align:right;">
+					<input type="text" name="<?php echo $_htmlName ?>[__index__][inclusions]" id="roomtypes_row___index___inclusions" class="<?php echo $_htmlClass ?>" disabled="no-template" />
+                
+                </td>
+                 <td style="text-align:right;">					
+					
+     <input type="text" name="<?php echo $_htmlName ?>[__index__][room_special_price]" id="roomtypes_row___index___room_special_price" class="<?php echo $_htmlClass ?> validate-number" disabled="no-template" style="width: 60px !important;" value="" />
+                
+                </td>
+                
+                
+                 <td style="text-align:right;">
+					<input style="width:80px !IMPORTANT;" type="text" name="<?php echo $_htmlName ?>[__index__][room_capacity]" id="roomtypes_row___index___room_capacity" class="<?php echo $_htmlClass ?> required-entry validate-digits" disabled="no-template" value=""/>
+                </td>
+                
+                 <td style="text-align:right;">
+					<input style="width:80px !IMPORTANT;" type="text" name="<?php echo $_htmlName ?>[__index__][room_quantity]" id="roomtypes_row___index___room_quantity" class="<?php echo $_htmlClass ?> required-entry validate-digits" disabled="no-template" value="" />
+                </td>
+                
+                <td style="text-align:right;display:none">					
+					<input type="text" name="<?php echo $_htmlName ?>[__index__][room_for_deal]" id="roomtypes_row___index___room_for_deal" class="<?php echo $_htmlClass ?>" disabled="no-template" />
+                
+                </td>
+                
+                
+                <td style="display:none;">
+					<input type="text" name="<?php echo $_htmlName ?>[__index__][room_type_id]" id="roomtypes_row___index___room_type_id" class="<?php echo $_htmlClass ?>" disabled="no-template" />
+                
+                </td>
+                <td <?php if (!$_storeId): ?>style="display:none"<?php endif; ?>>
+					<input type="checkbox" name="<?php echo $_htmlName ?>[__index__][use_default_value]" id="roomtypes_row___index___use_default_value"/> Use default value
+                </td>
+
+                <td class="last"><input type="hidden" name="<?php echo $_htmlName ?>[__index__][delete]" class="delete" disabled="no-template" value="" />
+                <button title="Delete Period" id="delete-room" class="scalable delete icon-btn delete-product-option" onclick="roomtypesControl.deleteItem(event);return false"><span>Delete</span></button></td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td <?php if (!$_multiWebsite): ?>style="display:none"<?php endif; ?>></td>
+                <td colspan="8" class="a-right"><?php echo $this->getChildHtml('add_button') ?></td>
+            </tr>
+        </tfoot>
+        <tbody id="<?php echo $_htmlId ?>_container">
+        </tbody>
+    </table>
+
+<script type="text/javascript">
+//<![CDATA[
+    var roomtypesControl = {
+        template : new Template('<tr>' + $('<?php echo $_htmlId ?>_add_template').innerHTML.replace(/__index__/g, '#{index}').replace(/ disabled="?no-template"?/g, '').replace(/ disabled/g, '').replace(/="'([^']*)'"/g, '="$1"') + '</tr>'),
+        itemsCount : 0,
+        defaultStoreId : <?php echo $_storeId;?>,
+        deleteButton: false,
+        addItem  : function () {
+            <?php if($_readonly): ?>
+            if (arguments.length < 5) {
+                return;
+            }
+            <?php endif; ?>
+            data = {};
+            data.store_id = <?php echo $_storeId;?>;
+            
+            data.period_dow = 1;
+            data.index = this.itemsCount++;
+            if(arguments.length >= 5) {
+                data.store_id = parseInt(arguments[0]);
+                data.room_type      = arguments[1];
+                data.room_quantity      = arguments[2];
+                data.room_capacity      = arguments[3];
+				
+                data.room_price_per_night        = arguments[4];
+                data.room_special_price        = arguments[5];
+                
+                
+                data.inclusions        = arguments[6];
+                data.room_type_id        = arguments[7];
+				data.period_dow = arguments[8];
+				//data.room_period_from = arguments[10];
+				//data.room_period_to = arguments[11];
+            }
+            /*if(data.index == 0){
+            	document.getElementById('delete-room').style.display = 'none';
+            }*/
+
+            Element.insert($('<?php echo $_htmlId ?>_container'), {'bottom':this.template.evaluate(data)});
+            $('roomtypes_row_'+data.index+'_room_type').setValue(data.room_type, 1);
+            $('roomtypes_row_'+data.index+'_website').setValue(data.website_id);
+            $('roomtypes_row_'+data.index+'_room_quantity').setValue(data.room_quantity);
+            $('roomtypes_row_'+data.index+'_room_capacity').setValue(data.room_capacity);
+            $('roomtypes_row_'+data.index+'_room_price_per_night').setValue(data.room_price_per_night);
+            $('roomtypes_row_'+data.index+'_room_special_price').setValue(data.room_special_price);
+            //$('special_days_row_'+data.index+'_period_from').setValue(data.room_period_from);
+            //$('special_days_row_'+data.index+'_period_to').setValue(data.room_period_to);
+            $('roomtypes_row_'+data.index+'_inclusions').setValue(data.inclusions);
+            $('roomtypes_row_'+data.index+'_room_type_id').setValue(data.room_type_id);
+            
+            $('roomtypes_row_'+data.index+'_use_default_value').setValue(data.store_id == 0);
+			
+            if(data.store_id && (typeof arguments[4] == 'undefined')){
+				$($('roomtypes_row_'+data.index+'_use_default_value').parentNode).style.visibility='hidden';
+			}
+            
+            fireChangeEvt($('roomtypes_row_'+data.index+'_room_type'))
+           
+            $('roomtypes_row_'+data.index+'_use_default_value').onclick = function(){
+				if(this.checked){
+					$(this.parentNode.parentNode).select('input', 'select', 'button')
+						.each(roomtypesControl.disableElement);
+				}else{
+					$(this.parentNode.parentNode).select('input', 'select', 'button')
+						.each(roomtypesControl.enableElement);
+				}
+			}
+
+			if(!data.store_id && parseInt(this.defaultStoreId)){
+				 $($('roomtypes_row_'+data.index+'_use_default_value').parentNode.parentNode)
+						.select('input', 'select', 'button')
+						.each(roomtypesControl.disableElement);
+						
+			}
+			
+			
+            
+            <?php if ($_readonly): ?>
+            $('<?php echo $_htmlId ?>_container').select('input', 'select')
+                .each(this.disableElement);
+            $('<?php echo $_htmlId ?>_container').up('table').select('button')
+                .each(this.disableElement);
+            <?php endif; ?>
+            
+          
+               
+             
+
+        },
+        disableElement: function(elem) {
+            if(elem.type == 'checkbox') return;
+            elem.disabled = true;
+            elem.addClassName('disabled');
+        },
+        enableElement: function(elem) {
+            elem.disabled = false
+            elem.removeClassName('disabled');
+        },       
+        deleteItem : function(event) {
+            var tr = Event.findElement(event, 'tr');
+            if (tr) {
+                Element.select(tr, '.delete').each(function(elem){elem.value='1'});
+                Element.select(tr, ['input', 'select']).each(function(elem){elem.hide()});
+                Element.hide(tr);
+                Element.addClassName(tr, 'no-display template');
+            }
+        }
+    }    
+    
+    
+    <?php //echo count($this->getValues());
+    foreach ($this->getValues() as $_item):
+		 //$_item['room_period_from'] = $this->formatDate( $_item['room_period_from']);
+		 //$_item['room_period_to'] = $this->formatDate( $_item['room_period_to']);
+    ?>
+    //roomtypesControl.addItem('<?php //echo $_item['store_id'] ?>', '<?php //echo $_item['room_type'] ?>', '<?php //echo $_item['room_quantity']?>', '<?php //echo $_item['room_capacity']?>', '<?php //echo $_item['room_price_per_night']?>', '<?php //echo $_item['room_special_price']?>',  '<?php //echo $_item['inclusions']?>','<?php //echo $_item['id'] ?>', true, '<?php //echo $dow?>', '<?php //echo $_item['room_period_from'] ?>','<?php //echo $_item['room_period_to'] ?>');
+      roomtypesControl.addItem('<?php echo $_item['store_id'] ?>', '<?php echo $_item['room_type'] ?>', '<?php echo $_item['room_quantity']?>', '<?php echo $_item['room_capacity']?>', '<?php echo $_item['room_price_per_night']?>', '<?php echo $_item['room_special_price']?>',  '<?php echo $_item['inclusions']?>','<?php echo $_item['id'] ?>', true, '<?php echo $dow?>');
+    <?php endforeach; ?>
+    <?php if ($_readonly): ?>
+        $('<?php echo $_htmlId ?>_container').up('table').select('button')
+            .each(roomtypesControl.disableElement);
+    <?php endif; ?>
+//]]>
+	
+	function fireChangeEvt(obj){
+			
+			if(typeof document.createEvent !== 'undefined'){
+				var e = document.createEvent('HTMLEvents');
+				e.initEvent('change', false, false);
+				obj.dispatchEvent(e);
+			}else{
+				obj.fireEvent('onchange')
+			}
+		}
+	<?php if(count($this->getValues()) == 0):?>
+			roomtypesControl.addItem();
+	<?php endif;?>
+</script>
+
+
+
+</td>
+</tr>
+

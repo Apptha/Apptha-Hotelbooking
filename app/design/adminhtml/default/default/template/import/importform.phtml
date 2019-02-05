@@ -1,0 +1,75 @@
+<style type="text/css">
+    .export-form{
+       
+        min-height: 50px;
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+    .export-form select{
+        width: 100px;
+height: 21px;
+    }
+    .export-form span {
+        font-size: 12px;
+font-family: arial;
+font-weight: bold;
+        
+    }
+    .submit-button{
+        width: 60px;
+        height: 20px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #ed6502 #a04300 #a04300 #ed6502;
+        padding: 1px 7px 2px 7px;
+        background: #ffac47 url(images/btn_bg.gif) repeat-x 0 100%;
+        color: #fff;
+        font: bold 12px arial, helvetica, sans-serif;
+        cursor: pointer;
+        text-align: center !important;
+        white-space: nowrap;
+    }
+    .label-header label{
+        color: white;
+        font-weight: bold;
+        padding: 5px;
+    }
+</style>
+<div class="import-export" style="">
+    <div class="">
+        <h3 class="icon-head head-adminhtml-orders" style="color: #eb5e00;">Import - Hotel Product</h3>
+    </div>
+    
+    <div class="content-header"></div>
+    
+    <div class="label-header" style="background: #6f8992;padding: 0px 2px;min-height: 20px;">
+      <label>Import Settings</label>
+    </div>
+    
+    <div class="export-form">
+
+
+<form method="post" name="importform" id="import" action="<?php echo Mage::helper("adminhtml")->getUrl("*/*/importcsv")?>" enctype="multipart/form-data">
+
+    <input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey(); ?>" />
+    <input type="file" name="files" value="" onchange="return validateFileExtension(this)" />
+
+    <input type="submit" name="importcsv" class="submit-button" value="import" />
+
+</form>
+        
+   </div>
+</div>
+
+<script type="text/javascript">
+function validateFileExtension(fld) {
+    if(!/(\.xls|\.xlsx|\.csv)$/i.test(fld.value)) {
+        //alert("Invalid image file type.");      
+        fld.form.reset();
+        fld.focus();        
+        alert("invalid file format");
+        return false;   
+    }   
+    return true; 
+ }
+</script>

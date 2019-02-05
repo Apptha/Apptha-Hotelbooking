@@ -1,0 +1,71 @@
+<style type="text/css">
+    .export-form{
+       
+        min-height: 50px;
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+    .export-form select{
+        width: 100px;
+height: 21px;
+margin-left: 30px;
+    }
+    .export-form span {
+        font-size: 12px;
+font-family: arial;
+
+        
+    }
+    .submit-button{
+        width: 60px;
+        height: 20px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #ed6502 #a04300 #a04300 #ed6502;
+        padding: 1px 7px 2px 7px;
+        background: #ffac47 url(images/btn_bg.gif) repeat-x 0 100%;
+        color: #fff;
+        font: bold 12px arial, helvetica, sans-serif;
+        cursor: pointer;
+        text-align: center !important;
+        white-space: nowrap;
+        margin-left: 10px;
+    }
+    .label-header label{
+        color: white;
+        font-weight: bold;
+        padding: 5px;
+    }
+</style>
+
+<div class="import-export" style="">
+    <div class="">
+        <h3 class="icon-head head-adminhtml-orders" style="color: #eb5e00;">Export - Hotel Product</h3>
+    </div>
+    
+    <div class="content-header"></div>
+    
+    
+    <div class="label-header" style="background: #6f8992;padding: 0px 2px;min-height: 20px;">
+      <label>Export Settings</label>
+    </div>
+    <div class="export-form">
+        
+        <form method="post" name="exportform" id="export" action="<?php echo Mage::helper("adminhtml")->getUrl("*/*/exportcsv")?>" >
+            
+<input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey(); ?>" />
+    <span>Export Hotels :</span> 
+    <select name="products" style="">
+        <option value="1">Hotels</option>
+    </select>
+
+    <input type="submit" name="exportcsv" class="submit-button" value="export" />
+
+</form>
+        
+    </div>
+    
+
+        
+</div>
+</div>

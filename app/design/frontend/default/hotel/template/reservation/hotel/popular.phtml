@@ -1,0 +1,130 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2012 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+
+<div class="popular">
+<?php 
+$model = Mage::getModel('catalog/product');
+
+$_coreHelper = $this->helper('core');
+$productDetails = $this->popularhotels();
+?>
+<h2 class="subtitle"><?php echo $this->__('Top Destinations') ?></h2>
+    <?php $_columnCount = 4 ?>
+    <?php $i = 0;
+    foreach ($productDetails as $_product): ?>
+            <?php if ($i++ % $_columnCount == 0): ?>
+            <ul class="products-grid">
+        <?php endif; 
+             $product_status = $_product->getStatus(); 
+             if($product_status == 1) {
+        ?>
+                <?php
+                        if (strlen($_product->getName()) > 30) {
+                            $product_name = substr($_product->getName(), 0, 30) . "...";
+                        } else {
+                            $product_name = $_product->getName();
+                        }
+                        ?>
+            <li class="item<?php if (($i - 1) % $_columnCount == 0): ?> first<?php elseif ($i % $_columnCount == 0): ?> last<?php endif; ?>">
+                <a href="<?php echo $_product->getProductUrl() ?>" title="<?php echo $this->htmlEscape($_product->getName()) ?>" class="product-image">
+                <img src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->constrainOnly(TRUE)->keepAspectRatio(TRUE)->keepFrame(FALSE)->resize(223,135); ?>" alt="<?php echo $this->htmlEscape($_product->getName()) ?>" />
+                </a>
+                <h3 class="product-name"><a href="<?php echo $_product->getProductUrl() ?>" title="<?php echo $this->htmlEscape($_product->getName()) ?>"><?php echo $this->htmlEscape($product_name) ?></a></h3>
+        <?php echo $this->getReviewsSummaryHtml($_product, 'short') ?>
+                <?php
+                if ($_product->getTypeId() == 'hotel') {
+                    $roomPrice = Mage::getResourceModel('reservation/roomtypes')->getHotelPrice($_product->getId());
+                    $rooms = Mage::getBlockSingleton('reservation/hotel_list')->_getHotelRooms($_product->getId(), $_product->getStoreId());
+                    $isRoomsAvail = count($rooms);
+                    if ($isRoomsAvail):
+                        foreach ($rooms as $room):
+                            $room->getRoomSpecialPrice();
+                        endforeach;
+                    endif;
+                    ?> 
+                    <?php if ($room->getRoomSpecialPrice() != 0):
+                        $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false);//Regular Price 
+                        $spl_price = $_coreHelper->currency($roomPrice[0]['lowspecialprice'], true, false);
+                        ?>
+                        <div class="newproduct_price">
+                            <span class="prices_from"><?php echo $this->__('From : ') ?></span>
+                            <p class="list_regular"><?php echo $reg_price; ?></p>
+                            <p class="list_special"><?php echo $spl_price; ?></p>
+                        </div>
+                    <?php else:
+                        $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false);    ?>
+                        <div class="newproduct_price">
+                            <span class="prices_from"><?php echo $this->__('From : ') ?></span>
+                            <p class="list_regular regular_alone"><?php echo $reg_price; ?></p>
+                        </div>
+                    <?php endif; ?>
+                    <div class="actions">
+                        <button type="button" title="<?php echo $this->__('Select room') ?>" class="button btn-cart" 
+                                onclick="setLocation('<?php echo $_product->getProductUrl() ?>')">
+                            <span><span><?php echo $this->__('Select room') ?></span></span>
+                        </button>
+
+                        <ul class="add-to-links">
+                            <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                                <li><a href="<?php echo $this->getAddToWishlistUrl($_product) ?>" class="link-wishlist" title="<?php echo $this->__('Add to Wishlist') ?>"><?php echo $this->__('Add to Wishlist') ?></a></li>
+                            <?php endif; ?>
+								<?php
+								$_compareUrl = Mage::helper('catalog/product_compare')->getAddUrl($_product);
+							if ($_compareUrl): ?>
+                                <li><span class="separator">|</span> <a href="<?php echo $_compareUrl ?>" class="link-compare" title="<?php echo $this->__('Add to Compare') ?>"><?php echo $this->__('Add to Compare') ?></a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                <?php } else {
+
+                    echo $this->getPriceHtml($_product, true, '-new') ?>
+
+                    <div class="actions">
+
+                        <?php if ($_product->isSaleable()): ?>
+                            <button type="button" title="<?php echo $this->__('Select Room') ?>" class="button btn-cart" onclick="setLocation('<?php echo $this->getAddToCartUrl($_product) ?>')"><span><span><?php echo $this->__('Select Room') ?></span></span></button>
+                        <?php else: ?>
+                            <p class="availability out-of-stock"><span><?php echo $this->__('Out of stock') ?></span></p>
+                        <?php endif; ?>
+                        <ul class="add-to-links">
+                            <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                                <li><a href="<?php echo $this->getAddToWishlistUrl($_product) ?>" class="link-wishlist" title="<?php echo $this->__('Add to Wishlist') ?>"><?php echo $this->__('Add to Wishlist') ?></a></li>
+                            <?php endif; ?>
+                            <?php
+								$_compareUrl = Mage::helper('catalog/product_compare')->getAddUrl($_product);
+							if ($_compareUrl): ?>
+                                <li><span class="separator">|</span> <a href="<?php echo $_compareUrl ?>" class="link-compare" title="<?php echo $this->__('Add to Compare') ?>"><?php echo $this->__('Add to Compare') ?></a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                <?php } ?> 
+            </li>
+             <?php } if ($i % $_columnCount == 0 || $i == count($_products)): ?>
+            </ul>
+        <?php endif ?>
+    <?php endforeach; ?>
+</div>

@@ -1,0 +1,41 @@
+<?php
+/**
+ * @name         :  Apptha One Step Checkout
+ * @version      :  1.7
+ * @since        :  Magento 1.4
+ * @author       :  Apptha - http://www.apptha.com
+ * @copyright    :  Copyright (C) 2011 Powered by Apptha
+ * @license      :  http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * @Creation Date:  June 20 2011
+ * @Modified By  :  Bala G
+ * @Modified Date:  August 1 2013
+ *
+ * */
+?>
+<?php
+/**
+ * @see Mage_Checkout_Block_Agreements
+ */
+?>
+
+<?php if (!$this->getAgreements()) return;
+$terms_enable = Mage::getStoreConfig('onestepcheckout/terms/enable_terms');
+?>
+<form id="checkout-agreements" onsubmit="return false;" >
+<ol class="checkout-agreements" <?php if($terms_enable == 1) { echo 'style="display:none!important"'; } ?>>
+<?php foreach ($this->getAgreements() as $_a): ?>
+    <li>
+        <div class="agreement-content"<?php echo ($_a->getContentHeight() ? ' style="height:' . $_a->getContentHeight() . '"' : '')?>>
+            <?php if ($_a->getIsHtml()):?>
+                <?php echo $_a->getContent() ?>
+            <?php else:?>
+                <?php echo nl2br($this->htmlEscape($_a->getContent())) ?>
+            <?php endif; ?>
+        </div>
+        <p class="agree">
+            <input type="checkbox" <?php if($terms_enable == 1) { echo 'checked="checked"'; } ?> class="required-entry" id="agreement-<?php echo $_a->getId()?>" name="agreement[<?php echo $_a->getId()?>]" value="1" title="<?php echo $this->htmlEscape($_a->getCheckboxText()) ?>" class="checkbox" /><label for="agreement-<?php echo $_a->getId()?>"><?php echo $this->htmlEscape($_a->getCheckboxText()) ?></label>
+        </p>
+    </li>
+<?php endforeach ?>
+</ol>
+</form>

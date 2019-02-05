@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    /**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+
+<config>
+    <modules>
+        <Apptha_Reservation>
+            <version>1.0.38</version>
+            <platform>ce</platform>
+        </Apptha_Reservation>
+    </modules>
+    <frontend>
+        <routers>
+            <reservation>
+                <use>standard</use>
+                <args>
+                    <module>Apptha_Reservation</module>
+                    <frontName>reservation</frontName>
+                </args>
+            </reservation>
+        </routers>
+      
+        <layout>
+            <updates>
+                <reservation>
+                    <file>reservation.xml</file>
+                </reservation>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Apptha_Reservation>
+                    <files>
+                        <default>Reservation.csv</default>
+                    </files>
+                </Apptha_Reservation>
+            </modules>
+        </translate>
+        <events>
+<!--            <checkout_cart_product_add_after>
+                <observers>
+                    <reservation_observer_checkout_2>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>applyCustomPrice</method>
+                    </reservation_observer_checkout_2>
+                </observers>    
+            </checkout_cart_product_add_after>-->
+            
+            
+
+            <sales_quote_item_save_after>
+                <observers>
+                    <reservation_observer_checkout>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>saveCartItems</method>
+                    </reservation_observer_checkout>
+                </observers>
+            </sales_quote_item_save_after>
+         
+            <sales_quote_remove_item>
+                <observers>
+                    <reservation_observer_checkout_3>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>deleteCartItems</method>
+                    </reservation_observer_checkout_3>
+                </observers>
+            </sales_quote_remove_item>
+         
+            <sales_order_place_before>
+                <observers>
+                    <reservation_observer_order_save_before>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>checkStock</method>
+                    </reservation_observer_order_save_before>
+                </observers>
+            </sales_order_place_before>
+            
+            <checkout_type_onepage_save_order_after>
+                <observers>
+                    <reservation>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>saveHotelOrderItems</method>
+                    </reservation>
+                </observers>
+            </checkout_type_onepage_save_order_after>
+ 
+            <sales_convert_quote_item_to_order_item>
+                <observers>
+                    <reservation_observer_order_3>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>salesConvertQuoteItemToOrderItem</method>
+
+                    </reservation_observer_order_3>
+                </observers>
+            </sales_convert_quote_item_to_order_item>
+          
+        </events>
+    </frontend>
+    <admin>
+    <routers>
+        <reservation>
+            <use>admin</use>
+            <args>
+                <module>Apptha_Reservation</module>
+                <frontName>reservation</frontName>
+            </args>
+        </reservation>
+    </routers>
+  </admin>
+    <adminhtml>
+        <layout>
+            <updates>
+                <reservation>
+                    <file>reservation.xml</file>
+                </reservation>
+            </updates>
+        </layout>
+        <sales>
+            <order>
+                <create>
+                    <available_product_types>
+                        <hotel/>
+                    </available_product_types>
+                </create>
+            </order>
+        </sales>
+        <events>
+            <adminhtml_catalog_product_edit_prepare_form>
+                <observers>
+                    <reservation_observer>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>attachExcludeEditor</method>
+                    </reservation_observer>
+                    
+                    <reservation_observer_2>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>attachRoomTypeEditor</method>
+                    </reservation_observer_2>
+                                     
+                </observers> 
+            </adminhtml_catalog_product_edit_prepare_form>
+            <catalog_product_prepare_save>
+                <observers>
+                    <reservation>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>catalogProductPrepareSave</method>
+                    </reservation>
+                </observers>
+            </catalog_product_prepare_save>
+            <catalog_product_save_after>
+                <observers>
+                    <reservation>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>catalogProductSaveAfter</method>
+                    </reservation>
+                </observers>
+            </catalog_product_save_after>
+
+            <sales_order_creditmemo_refund>
+                <observers>
+                    <reservation>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>catalogProductRefundAfter</method>
+                    </reservation>
+                </observers>
+           </sales_order_creditmemo_refund>
+           
+        </events>
+        <translate>
+            <modules>
+                <Apptha_Reservation>
+                    <files>
+                        <default>Reservation.csv</default>
+                    </files>
+                </Apptha_Reservation>
+            </modules>
+        </translate>
+    </adminhtml>
+    <global>
+        <rewrite>
+            <apptha_reservation_checkout_cart>
+                <from><![CDATA[#^/checkout/cart/#]]>
+                </from>
+                <to>/reservation/checkout_cart/</to>
+            </apptha_reservation_checkout_cart>
+        </rewrite>
+        
+        <catalog>
+            <product>
+                <type>
+                    <hotel translate="label" module="reservation">
+                        <label>Hotel Booking</label>
+                        <model>reservation/product_type_hotel</model>
+                        <is_qty>1</is_qty>
+                        <composite>0</composite>
+                        <index_priority>100</index_priority>
+                        <price_model>reservation/product_type_price</price_model>
+                        <index_data_retreiver>reservation/catalogIndex_data_hotel</index_data_retreiver>
+                    </hotel>
+                </type>
+
+            </product>
+            <rewrite>
+                <product_type_hotel>Apptha_Reservation_Model_Product_Type_Hotel</product_type_hotel>
+            </rewrite>
+        </catalog>
+      
+       
+        <blocks>
+            <reservation>
+                <class>Apptha_Reservation_Block</class>
+            </reservation>
+        </blocks>
+
+        <helpers>
+            <reservation>
+                <class>Apptha_Reservation_Helper</class>
+            </reservation>
+        </helpers>
+        <models>
+          
+            <reservation>
+                <class>Apptha_Reservation_Model</class>
+                <resourceModel>reservation_mysql4</resourceModel>
+            </reservation>
+            <reservation_mysql4>
+                <class>Apptha_Reservation_Model_Mysql4</class>
+                <entities>
+                    <exclude_days>
+                        <table>apptha_booking_exclude_days</table>
+                    </exclude_days>
+                    
+                    <room_types>
+                        <table>apptha_booking_room_types</table>
+                    </room_types>
+                    
+                    <hotel_orders>
+                        <table>apptha_booking_hotel_orders</table>
+                    </hotel_orders>
+                    
+                    <hotel_deal>
+                        <table>apptha_booking_hotel_deal</table>
+                    </hotel_deal>
+                    <hotel_inventory>
+                        <table>apptha_booking_hotel_inventory</table>
+                    </hotel_inventory>
+                    <hotel_stock>
+                        <table>apptha_booking_hotel_stock</table>
+                    </hotel_stock>
+                   
+                </entities>
+            </reservation_mysql4>
+            
+            <sales>
+                <rewrite>
+                    <quote_item>Apptha_Reservation_Model_Quote_Item</quote_item>
+                </rewrite>
+            </sales>
+            <sales>
+                <rewrite>
+                    <order>Apptha_Reservation_Model_Order</order>
+                </rewrite>
+            </sales>
+        </models>
+        
+        <resources>
+            <reservation_setup>
+                <setup>
+                    <module>Apptha_Reservation</module>
+                    <class>Mage_Catalog_Model_Resource_Eav_Mysql4_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </reservation_setup>
+            <reservation_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </reservation_write>
+            <reservation_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </reservation_read>
+        </resources>
+        <template>
+            <email>
+                <reservation_custom_email_cancelorder_template translate="label" module="reservation">
+                    <label>Hotel Reservation Cancel Order</label>
+                    <file>reservation/cancel_order.html</file>
+                    <type>html</type>
+                </reservation_custom_email_cancelorder_template>
+            </email>
+             
+            <email>
+                <reservation_order_template translate="label" module="reservation">
+                    <label>Order Email Template</label>
+                    <file>reservation/hotel_order_email.html</file>
+                    <type>html</type>
+                </reservation_order_template>
+            </email>
+            <email>
+                <reservation_email_coupon_template translate="label" module="reservation">
+                    <label>Hotel Reservation Coupon Template</label>
+                    <file>hotel_coupon.html</file>
+                    <type>html</type>
+                </reservation_email_coupon_template>
+            </email>
+            <email>
+                <reservation_reservation_custom_email_cancelorder_custom_template translate="label" module="reservation">
+                    <label>Hotel Reservation Cancel Order Template</label>
+                    <file>sales/cancel_order.html</file>
+                    <type>html</type>
+                </reservation_reservation_custom_email_cancelorder_custom_template>
+            </email>
+            <email>
+                <reservation_reservation_custom_email_newproduct_custom_template translate="label" module="reservation">
+                    <label>Hotel Reservation Subscribers Template</label>
+                    <file>subscribers_newproduct.html</file>
+                    <type>html</type>
+                </reservation_reservation_custom_email_newproduct_custom_template>
+            </email>
+        </template>
+        <events>
+            <order_cancel_after>
+                <observers>
+                    <reservation_observer_order_cancel>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>OrderCancel</method>
+                    </reservation_observer_order_cancel>
+                </observers>
+            </order_cancel_after>
+            <checkout_cart_add_product_complete>
+                <observers>
+                    <reservation_cartbypass_observer>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>afterAddToCart</method>
+                    </reservation_cartbypass_observer>
+                </observers>
+            </checkout_cart_add_product_complete>
+            <sales_order_status_after>
+                <observers>
+                    <deal>
+                        <type>singleton</type>
+                        <class>Apptha_Reservation_Model_Observer</class>
+                        <method>sendcoupon</method>
+                    </deal>
+                </observers>
+            </sales_order_status_after>
+        </events>
+    </global>
+    <default>
+        <reservation>
+            <order>
+                <enabled>1</enabled>
+                <template>reservation_order_template</template>                
+                <allow_b_link>1</allow_b_link>
+            </order>
+        </reservation>
+    </default>
+</config>
+

@@ -1,0 +1,71 @@
+<?php
+/**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<!--begin custom header content for this example-->
+
+
+<!--end custom header content for this example-->
+<?php
+    $_product = $this->getProduct();
+    $_helper = $this->helper('catalog/output');
+?>
+
+<script type="text/javascript">
+    var jq = jQuery.noConflict();
+		jq(document).ready(function() {
+			
+			/*
+			 *  Button helper. Disable animations, hide close button, change title type and content
+			 */
+
+			jq('.fancybox-buttons').fancybox({
+				openEffect  : 'none',
+				closeEffect : 'none',
+                                playSpeed   : '1000',
+				prevEffect : 'none',
+				nextEffect : 'none',
+
+				closeBtn  : false,
+
+				helpers : {
+					title : {
+						type : 'inside'
+					},
+					buttons	: {}
+				},
+
+				afterLoad : function() {
+					this.title = 'Image ' + (this.index + 1) + ' of ' + this.group.length + (this.title ? ' - ' + this.title : '');
+				}
+			});
+
+
+			
+		});
+	</script>
+
+<?php if (count($this->getGalleryImages()) > 0): ?>
+<div class="more-views media-images">
+    
+	    <ul>
+	    <?php 
+	    foreach ($this->getGalleryImages() as $_image): ?>
+	        <li>
+	            <a class="fancybox-buttons" data-fancybox-group="button" href="<?php echo $this->helper('catalog/image')->init($this->getProduct(), 'image', $_image->getFile()); ?>" rel="product-image"  title="<?php echo $this->htmlEscape($_image->getLabel()) ?>">
+                        <img src="<?php echo $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(80); ?>" width="80" height="80" alt="<?php echo $this->htmlEscape($_image->getLabel()) ?>" />
+                    </a>
+	        </li>
+	    <?php endforeach;
+		
+	    ?>
+	    </ul>
+</div>
+<?php 
+else: ?>
+	<span>No images available</span>
+<?php 
+endif; ?>

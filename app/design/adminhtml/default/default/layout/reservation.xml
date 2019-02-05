@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<layout>
+
+	<reservation_adminhtml_orders_index>
+        <reference name="content">
+            <block type="reservation/adminhtml_orders_hotel" name="orders_list">
+               
+            </block>
+        </reference>
+    </reservation_adminhtml_orders_index>
+    
+	<adminhtml_catalog_product_edit>
+	<reference name="head">
+		
+	    <action method="addCss"><name>apptha_reservation/css/exclude.css</name></action>
+	</reference>
+    
+    </adminhtml_catalog_product_edit>
+    <adminhtml_catalog_product_hotel>
+		<reference name="head">
+		    <action method="addCss"><name>apptha_reservation/css/exclude.css</name></action>
+		</reference>
+		
+		 <reference name="left">
+			<remove name="product_tabs"> </remove>
+			<block type="reservation/adminhtml_catalog_product_edit_tabs" name="product_tabs1"></block>
+        </reference> 
+    </adminhtml_catalog_product_hotel>
+    
+    <adminhtml_sales_order_view>
+		<reference name="order_items">
+		    <action method="addColumnRender">
+			<column>name</column>
+			<block>reservation/adminhtml_sales_items_column_name</block>
+			<template>sales/items/column/name.phtml</template>
+			<type>hotel</type>
+		    </action>
+		</reference>
+<!--		<reference name="sales_order_tabs">
+		    <block type="reservation/adminhtml_sales_order_view_details" name="order_info_tab_hotel" template="reservation/sales/order/view/details.phtml"></block>
+		     <action method="addTab"><name>hotel_order_info</name><block>order_info_tab_booking</block></action> 	
+		</reference>-->
+    </adminhtml_sales_order_view>
+    
+    <adminhtml_sales_order_invoice_new>
+	<reference name="order_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_invoice_new>
+    <adminhtml_sales_order_invoice_updateqty>
+	<reference name="order_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_invoice_updateqty>
+    <adminhtml_sales_order_invoice_view>
+	<reference name="invoice_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_invoice_view>
+    <adminhtml_sales_order_shipment_new>
+	<reference name="order_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_shipment_new>
+    
+
+    <adminhtml_sales_order_shipment_view>
+	<reference name="shipment_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_shipment_view>
+    <adminhtml_sales_order_creditmemo_new>
+	<reference name="order_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_creditmemo_new>
+
+    <adminhtml_sales_order_creditmemo_updateqty>
+	<reference name="order_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_creditmemo_updateqty>
+
+    <adminhtml_sales_order_creditmemo_view>
+	<reference name="creditmemo_items">
+	    <action method="addColumnRender">
+		<column>name</column>
+		<block>reservation/adminhtml_sales_items_column_name</block>
+		<template>sales/items/column/name.phtml</template>
+		<type>hotel</type>
+	    </action>
+	</reference>
+    </adminhtml_sales_order_creditmemo_view>
+
+    
+</layout>

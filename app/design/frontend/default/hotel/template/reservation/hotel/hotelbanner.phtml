@@ -1,0 +1,107 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2012 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+
+<div class="slider_banner">
+<?php 
+$model = Mage::getModel('catalog/product');
+$_coreHelper = $this->helper('core');
+$productDetails = $this->bannerslider();
+$productCount = 1;
+
+if($productCount > 0){ ?>
+<div class="slideshow-wrapper">    
+        <ul class="slideshow">
+    <?php foreach ($productDetails as $products) { ?>
+    <li class="slide">        
+    <?php  
+   
+        $product = $model->load($products->getId());
+        $productName = $product->getName();
+        $productDescription = substr($product->getdescription(),0,126).'...';
+        if ($products->getTypeId() == 'hotel') 
+            {
+                $roomPrice = Mage::getResourceModel('reservation/roomtypes')->getHotelPrice($products->getId());
+                $rooms = Mage::getBlockSingleton('reservation/hotel_list')->_getHotelRooms($products->getId(), $products->getStoreId());
+                $isRoomsAvail = count($rooms);
+                if ($isRoomsAvail):
+                    foreach ($rooms as $room):
+                        $room->getRoomSpecialPrice();
+                    endforeach;
+                endif;
+                
+            }   ?>
+
+        <div class="banner_content">
+            <p class="banner_pname"><?php echo $productName; ?></p>
+            <p class="banner_pdes"><?php echo $productDescription; ?></p>
+            <?php if ($room->getRoomSpecialPrice() != 0):
+                        $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false);//Regular Price 
+                        $spl_price = $_coreHelper->currency($roomPrice[0]['lowspecialprice'], true, false);
+                        ?>
+                       
+                        <div class="productListPrice">
+                            <span class="prices_from"><?php echo $this->__('From : ') ?></span>
+                            <p class="list_regular"><?php echo $reg_price; ?></p>
+                            <p class="list_special"><?php echo $spl_price; ?></p>
+                        </div>
+            <?php else:
+                        $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false);    ?>
+                        <div class="productListPrice">
+                            <span class="prices_from"><?php echo $this->__('From : ') ?></span>
+                            <p class="list_regular regular_alone"><?php echo $reg_price; ?></p>
+                        </div>
+            <?php endif; ?>
+            <div class="clear"></div>
+            <a href="<?php echo $products->getProductUrl(); ?>" class="banner_more"><?php echo $this->__('More Details..') ?>  </a>
+        </div>
+        <img src="<?php echo Mage::helper('catalog/image')->init($product, 'banner'); ?>" alt="" width="100%"  height="450"/>
+    </li>
+    <?php  } ?> 
+         </ul>
+        <a href="#" id="home-slides-prev" class="backward browse-button">previous</a>
+        <a href="#" id="home-slides-next" class="forward browse-button">next</a>
+        <!--<div id="home-slides-pager" class="tab-pager tab-pager-img tab-pager-ring-lgray"></div>-->
+</div>
+<script type="text/javascript">
+    //<![CDATA[
+	jQuery(function() {
+		jQuery(".slideshow").cycle({
+			fx: 'fade', easing: 'easeInOutCubic', 
+                        timeout: 10000, speedOut: 800, speedIn: 800, 
+                        sync: 1, pause: 1, fit: 0, 
+                        pager: '#home-slides-pager',
+			prev: '#home-slides-prev',
+			next: '#home-slides-next'
+		});
+	});
+    //]]>
+</script>  
+<?php  } ?>
+</div>
+<div class="banner_search">
+    <?php echo $this->getChildHtml('reservation_search'); ?>
+</div>

@@ -1,0 +1,324 @@
+<?php
+/**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+
+<?php
+/**
+ * Product list template
+ *
+ * @see Mage_Catalog_Block_Product_List
+ */
+?>
+<!--Compare Product Display Message-->
+
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+
+<!--Compare Product Display Message-->
+<?php
+$_productCollection = $this->getLoadedProductCollection();
+
+$dealAvailable = $this->getLoadDeal();
+$_helper = $this->helper('catalog/output');
+$_coreHelper = $this->helper('core');
+$isThisEnabled = Mage::getStoreConfig('advanced/modules_disable_output/Apptha_Reservation');
+
+
+?>
+<?php if (!$_productCollection->count()): ?>
+    <p class="note-msg"><?php echo $this->__('There are no hotels matching the selection.') ?></p>
+<?php else: ?>
+    <div class="category-products">
+        <?php echo $this->getToolbarHtml() ?>
+        <?php // List mode ?>
+        <?php if ($this->getMode() != 'grid'): ?>
+            <?php $_iterator = 0; ?>
+            <ol class="products-list" id="products-list">
+                <?php
+                $checkindate = $this->getRequest()->getParam('check-in');
+                $checkoutdate = $this->getRequest()->getParam('check-out');
+                $fromTimeStamp = Apptha_Reservation_Helper_Data::toTimestamp($checkindate);
+                if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+                    $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
+                }
+                
+                $HotelStock = Apptha_Reservation_Helper_Data::_getHotelStock();
+                $stockCollection = $HotelStock->getCollection();
+                   $order = $this->getRequest()->getParam('order');
+               
+
+                foreach ($_productCollection as $_product):
+                    
+                    
+                    
+                   $roomCollection = Mage::getModel('reservation/roomtypes')->getCollection()
+        					->addEntityIdFIlter($_product->getId());
+                    
+                    $flag = 0;
+                    if (Mage::getSingleton('customer/session')->isLoggedIn() && $checkindate != '' && $checkoutdate != '') {
+                        
+                        $HotelStock = Apptha_Reservation_Helper_Data::_getHotelStock();
+                        $stockCollection = $HotelStock->getCollection();
+                        
+                        foreach($roomCollection as $_roomCollection ){
+                            
+                          //  echo $_roomCollection->getRoomPricePerNight();
+                            
+                            $stock = $stockCollection->getPeriodIdFilter($_roomCollection->getId(), $fromTimeStamp, $_product->getId()); 
+                            
+                            if($stock->getSize()>0){
+                                $flag = 1;
+                            }else{
+                                $flag = 0;
+                            }
+                           
+                        }
+                     }
+
+                    
+
+                    if ($flag != 1) {
+                        $_product = Mage::getModel('catalog/product')->load($_product->getId());
+                        $roomPrice = Mage::getResourceModel('reservation/roomtypes')->getHotelPrice($_product->getId());
+                        $rooms = Mage::getBlockSingleton('reservation/hotel_list')->_getHotelRooms($_product->getId(), $_product->getStoreId());
+                        
+                        
+                    $isRoomsAvail = count($rooms);
+                    if ($isRoomsAvail):
+                        foreach ($rooms as $room):
+                            $room->getRoomSpecialPrice();
+                            
+                        endforeach;
+                    endif;
+                    $special = Apptha_Reservation_Helper_Data::checkIsSpecial($room->getRoomPeriodFrom(), $room->getRoomPeriodTo());
+
+                    
+                    ?>
+
+                    <li class="item<?php if (++$_iterator == sizeof($_productCollection)): ?> last<?php endif; ?> listDiv">
+                    <?php // Product Image ?>
+                    <?php if ($_product->getAppthaHotelSlogan()): ?>
+                            <div class="sloganDiv"><h5><?php echo $_product->getAppthaHotelSlogan() ?></h5></div>
+                    <?php endif; ?>
+                        <div class="product-list-image">
+                            <a href="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>" title="<?php echo $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image">
+                                <img src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->constrainOnly(TRUE)->keepAspectRatio(TRUE)->keepFrame(FALSE)->resize(210, 135); ?>" alt="<?php echo $this->htmlEscape($_product->getName()) ?>" />
+                            </a>
+                        </div>
+                        <?php // Product description ?>
+                        <div class="product-shop">
+                            <div class="f-fix listpageright">
+            <?php $_productNameStripped = $this->stripTags($_product->getName(), null, true); ?>
+                                
+                  <h2 class="product-name">
+                        <?php
+                        if (strlen($_helper->productAttribute($_product, $_product->getName(), 'name')) > 30) {
+                            $product_name = substr($_helper->productAttribute($_product, $_product->getName(), 'name'), 0, 30) . "...";
+                        } else {
+                            $product_name = $_helper->productAttribute($_product, $_product->getName(), 'name');
+                        }
+                        ?>
+                            <a href="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>" title="<?php echo $this->stripTags($_product->getName(), null, true) ?>">
+                            <?php echo $product_name ?></a></h2>      
+                          <?php if ($_product->getRatingSummary()): ?>
+                            <?php echo $this->getReviewsSummaryHtml($_product) ?>
+            <?php endif; ?>
+                                <div class="productListPrice">
+                                <?php
+                                if ($room->getRoomSpecialPrice() != 0):
+                                     $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false); //Regular Price 
+                                    $spl_price = $_coreHelper->currency($roomPrice[0]['lowspecialprice'], true, false);
+                                    ?>
+                                        <p class="list_regular"><?php echo $reg_price; ?></p>
+                                        <p class="list_special"><?php echo $spl_price; ?></p>
+                                    <?php else: $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false); ?>
+                                        <p class="list_regular regular_alone"><?php echo $reg_price; ?></p>
+                                    <?php endif; ?>
+
+                                </div>
+                                <div class="productListSelectRoom">
+                                    <?php //if ($_product->isSaleable()):  ?>
+
+
+                                    <div class="desc std">
+            <?php echo $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description') ?>
+                                        <a href="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>" title="<?php echo $_productNameStripped ?>" class="link-learn"><?php echo $this->__('Learn More') ?></a>
+                                    </div>
+                                    <button type="button" title="<?php echo $this->__('Select room') ?>" class="button btn-cart selectbtn" onclick="setLocation('<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>')"><span><span><?php echo $this->__('Select room') ?></span></span></button>
+                                    <ul class="add-to-links">
+                                        <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                                            <li><a href="<?php echo $this->helper('wishlist')->getAddUrl($_product) ?>" title="Add to Wishlist" class="link-wishlist"><?php echo $this->__('Add to Wishlist') ?></a></li>
+            <?php endif; ?>
+            <?php if ($_compareUrl = $this->getAddToCompareUrl($_product)): ?>
+                                            <li><span class="separator">|</span> <a href="<?php echo $_compareUrl ?>" title="Add to Compare" class="link-compare"><?php echo $this->__('Add to Compare') ?></a></li>
+                                        <?php endif; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                    </li>
+                    <?php } endforeach;
+                    
+                    
+                    ?>
+            </ol>
+            <script type="text/javascript">decorateList('products-list', 'none-recursive')</script>
+
+    <?php else: ?>
+
+                <?php // Grid Mode   ?>
+
+        <?php $_collectionSize = $_productCollection->count() ?>
+            <?php //$_columnCount = $this->getColumnCount();   ?>
+            <?php $_columnCount = 3; ?>
+            <?php
+            $i = 0;
+                $checkindate = $this->getRequest()->getParam('check-in');
+                $checkoutdate = $this->getRequest()->getParam('check-out');
+                $fromTimeStamp = Apptha_Reservation_Helper_Data::toTimestamp($checkindate);
+                if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+                    $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
+                }
+                
+                $HotelStock = Apptha_Reservation_Helper_Data::_getHotelStock();
+                $stockCollection = $HotelStock->getCollection();
+                
+            foreach ($_productCollection as $_product):
+                $_product = Mage::getModel('catalog/product')->load($_product->getId());
+            
+                if ($_product->getTypeId() == 'hotel') {
+                    
+                    $roomCollection = Mage::getModel('reservation/roomtypes')->getCollection()
+        					->addEntityIdFIlter($_product->getId());
+                    
+                    $flag = 0;
+                    if (Mage::getSingleton('customer/session')->isLoggedIn() && $checkindate != '' && $checkoutdate != '') {
+                        
+                        $HotelStock = Apptha_Reservation_Helper_Data::_getHotelStock();
+                        $stockCollection = $HotelStock->getCollection();
+                        
+                        foreach($roomCollection as $_roomCollection ){
+                            
+                            $stock = $stockCollection->getPeriodIdFilter($_roomCollection->getId(), $fromTimeStamp, $_product->getId()); 
+                            
+                            if($stock->getSize()>0){
+                                $flag = 1;
+                            }else{
+                                $flag = 0;
+                            }
+                           
+                        }
+                     }
+                     
+                     if ($flag != 1) {
+                        $_product = Mage::getModel('catalog/product')->load($_product->getId());
+                        $roomPrice = Mage::getResourceModel('reservation/roomtypes')->getHotelPrice($_product->getId());
+                        $rooms = Mage::getBlockSingleton('reservation/hotel_list')->_getHotelRooms($_product->getId(), $_product->getStoreId());
+                    
+                        
+                    $roomPrice = Mage::getResourceModel('reservation/roomtypes')->getHotelPrice($_product->getId());
+                    //$special = Apptha_Reservation_Helper_Data::checkIsSpecial($_product->getAppthaHotelDealFrom(),$_product->getAppthaHotelDealTo());
+                    $rooms = Mage::getBlockSingleton('reservation/hotel_list')->_getHotelRooms($_product->getId(), $_product->getStoreId());
+                    $isRoomsAvail = count($rooms);
+                    if ($isRoomsAvail):
+                        foreach ($rooms as $room):
+                            $room->getRoomSpecialPrice();
+                   $roomPrice[] = $room->getRoomPricePerNight();
+                        endforeach;
+                    endif;
+                    $special = Apptha_Reservation_Helper_Data::checkIsSpecial($room->getRoomPeriodFrom(), $room->getRoomPeriodTo());
+                  
+               //  
+                ?>
+                <?php if ($i++ % $_columnCount == 0): ?>
+                    <ul class="products-grid">
+                <?php endif ?>
+                    <li class="item<?php if (($i - 1) % $_columnCount == 0): ?> first<?php elseif ($i % $_columnCount == 0): ?>  last<?php endif; ?>">
+
+                        <a href="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>" title="<?php echo $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image">
+                            <img src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->constrainOnly(TRUE)->keepAspectRatio(TRUE)->keepFrame(FALSE)->resize(223, 135); ?>" alt="<?php echo $this->htmlEscape($_product->getName()) ?>" />
+                        </a>
+                        <h2 class="product-name">
+                        <?php
+                        if (strlen($_helper->productAttribute($_product, $_product->getName(), 'name')) > 30) {
+                            $product_name = substr($_helper->productAttribute($_product, $_product->getName(), 'name'), 0, 30) . "...";
+                        } else {
+                            $product_name = $_helper->productAttribute($_product, $_product->getName(), 'name');
+                        }
+                        ?>
+                            <a href="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>" title="<?php echo $this->stripTags($_product->getName(), null, true) ?>">
+                            <?php echo $product_name ?></a></h2>
+                            <?php if ($_product->getRatingSummary()): ?>
+                                <?php echo $this->getReviewsSummaryHtml($_product, 'short') ?>
+                                <?php
+                            endif;
+                            if ($_product->getTypeId() == 'hotel') {
+                                ?>
+                            <div class="productListPrice">
+                            <?php
+                            
+                            if ($room->getRoomSpecialPrice() != 0):
+                               $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false); //Regular Price 
+                               $spl_price = $_coreHelper->currency($roomPrice[0]['lowspecialprice'], true, false);
+                            ?>
+                                    <p class="list_regular"><?php echo $reg_price; ?></p>
+                                    <p class="list_special"><?php echo $spl_price; ?></p>
+                                <?php else: $reg_price = $_coreHelper->currency($roomPrice[0]['lowestprice'], true, false); ?>
+                                    <p class="list_regular regular_alone"><?php echo $reg_price; ?></p>
+                                <?php endif; ?>
+
+                            </div>
+                            <?php
+                            } else {
+                                echo $this->getPriceHtml($_product, true);
+                            }
+                            ?>
+                        <div class="clear"></div>
+                        <div class="actions">
+                        <?php
+                        if ($_product->getTypeId() == 'hotel') {
+                            // if ($_product->isSaleable()):
+                            ?>
+                                <button type="button" title="<?php echo $this->__('Select room') ?>" class="button btn-cart" onclick="setLocation('<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $_product->getUrlPath() ?>')">
+                                    <span><span><?php echo $this->__('Select room') ?></span></span>
+                                </button>
+                                <?php //else: ?>
+                <!--                                    <p class="availability out-of-stock"><span><?php echo $this->__('No booking(s) today') ?></span></p>-->
+                <?php
+                // endif;
+            } else {
+                ?>
+                                <?php if ($_product->isSaleable()): ?>
+                                    <button type="button" title="<?php echo $this->__('Add to Cart') ?>" class="button btn-cart" onclick="setLocation('<?php echo $this->getAddToCartUrl($_product) ?>')"><span><span><?php echo $this->__('Add to Cart') ?></span></span></button>
+                                <?php else: ?>
+                                    <p class="availability out-of-stock"><span><?php echo $this->__('Out of stock') ?></span></p>
+                                <?php endif; ?>
+                            <?php }
+                            ?>
+                            <ul class="add-to-links">
+                            <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                                    <li><a href="<?php echo $this->helper('wishlist')->getAddUrl($_product) ?>" title="Add to Wishlist" class="link-wishlist"><?php echo $this->__('Add to Wishlist') ?></a></li>
+                            <?php endif; ?>
+                            <?php if ($_compareUrl = $this->getAddToCompareUrl($_product)): ?>
+                                    <li><span class="separator">|</span> <a href="<?php echo $_compareUrl ?>" title="Add to Compare" class="link-compare"><?php echo $this->__('Add to Compare') ?></a></li>
+                                <?php endif;
+                                ?>
+                            </ul>
+                        </div>
+                    </li>
+                                <?php if ($i % $_columnCount == 0 || $i == $_collectionSize): ?>
+                    </ul>
+            <?php endif ?>
+            <?php } } endforeach; 
+
+            ?>
+            <script type="text/javascript">decorateGeneric($$('ul.products-grid'), ['odd', 'even', 'first', 'last'])</script>
+            <?php endif; ?>
+
+        <div class="toolbar-bottom">
+        <?php echo $this->getToolbarHtml() ?>
+        </div>
+    </div>
+<?php endif; ?>

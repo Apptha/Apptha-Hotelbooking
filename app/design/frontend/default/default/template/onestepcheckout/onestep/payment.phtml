@@ -1,0 +1,36 @@
+<?php
+/**
+ * @name         :  Apptha One Step Checkout
+ * @version      :  1.7
+ * @since        :  Magento 1.4
+ * @author       :  Apptha - http://www.apptha.com
+ * @copyright    :  Copyright (C) 2011 Powered by Apptha
+ * @license      :  http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * @Creation Date:  June 20 2011
+ * @Modified By  :  Bala G
+ * @Modified Date:  August 1 2013
+ *
+ * */
+?>
+<script type="text/javascript">
+//<![CDATA[
+
+    var payment = new Payment('<?php echo $this->getUrl('onestepcheckout/index/replay/', array('_secure'=>true)) ?>','<?php echo $this->getUrl('onestepcheckout/index/paymentreload/', array('_secure'=>true)) ?>','<?php echo $this->getUrl('onestepcheckout/index/index', array('_secure'=>true)) ?>');
+    
+//]]>
+ </script>
+<!---Title  of the page -->
+<div class="page-title">
+  <?php if (Mage::helper('onestepcheckout/checkout')->getVirtual()) { ?> <span class="shipping-method-bg"></span><?php } else { ?><span class="payment-bg"></span> <?php }?> <h1><?php echo $this->__('Payment Methods') ?></h1>
+</div>
+<!---End of Title -->
+<!---Start of Payment Methods -->
+<div id="ajax-payment-methods">
+<?php echo $this->getChildHtml('methods'); ?>
+</div>
+
+<div class="tool-tip" id="payment-tool-tip" style="display:none;">
+    <div class="btn-close"><a href="#" id="payment-tool-tip-close" title="<?php echo $this->__('Close') ?>"><?php echo $this->__('Close') ?></a></div>
+    <div class="tool-tip-content"><img src="<?php echo $this->getSkinUrl('images/cvv.gif') ?>" alt="<?php echo $this->__('Card Verification Number Visual Reference') ?>" title="<?php echo $this->__('Card Verification Number Visual Reference') ?>" /></div>
+</div>
+

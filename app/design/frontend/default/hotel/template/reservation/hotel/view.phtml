@@ -1,0 +1,969 @@
+<?php
+/**
+ * @ Author     : Apptha team
+ * @copyright   : Copyright (c) 2011 (www.apptha.com)
+ * @license     : http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<script type="text/javascript">
+    var jq = jQuery.noConflict();
+</script>
+<?php $_helper = $this->helper('catalog/output'); ?>
+
+<?php
+$_activeFrom = '';
+$_activeTo = '';
+$edit = '';
+$roomType = '';
+$buyPrice = '';
+$fromtimestamp = '';
+$_coreHelper = $this->helper('core');
+$_product = $this->getProduct(); //Load current product details here
+
+$dealEnabled = $_product->getAppthaHotelDealDay();
+$rooms = Mage::getBlockSingleton('reservation/hotel_list')->_getHotelRooms($_product->getId(), $_product->getStoreId()); //Load rooms list for current product
+
+$roomPrice = Mage::getResourceModel('reservation/roomtypes')->getHotelPrice($_product->getId()); //Load rooms price for current product
+
+$special = Apptha_Reservation_Helper_Data::checkIsSpecial($_product->getAppthaHotelDealFrom(), $_product->getAppthaHotelDealTo()); //Check whether deal validation
+//verifiying the excluding starting dates
+
+$currDate = Mage::app()->getLocale()->date()->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+$fromDate = $_product->getAppthaHotelPeriodFrom();
+$toDate = $_product->getAppthaHotelPeriodTo();
+$toDate = date("Y-m-d", strtotime($toDate));
+$diff = Mage::helper('reservation')->dateDiff($currDate, $fromDate);
+$hotelDateRange = Mage::helper('reservation')->dateDiff($currDate, $_product->getAppthaHotelPeriodTo());
+$arrExcludeDatesSingle = Mage::getModel('reservation/excludedays')->getCollection()->getExcludeDates($_product->getId(), 'single');
+$arrExcludeDatesPeriod = Mage::getModel('reservation/excludedays')->getCollection()->getExcludeDates($_product->getId(), 'period');
+$arrExcludeDatesPeriodRes = Mage::getModel('reservation/excludedays')->getExcludeDatesPeriodRes($arrExcludeDatesPeriod);
+$arrExcludeDates = Mage::getModel('reservation/excludedays')->getExcludeDatesRes($arrExcludeDatesSingle, $arrExcludeDatesPeriodRes);
+
+//verifiying the excluding ends dates
+$params = $params = Mage::app()->getRequest()->getParams();
+$quoteId = '';
+
+if (isset($params['quote'])) {
+    $quoteEditData = $this->_getQuoteToEdit();
+    $edit = true;
+    $quoteId = base64_decode($params['quote']);
+}
+
+$isRoomsAvail = count($rooms);
+
+$flg = 1;
+foreach ($rooms as $room):
+    if ($flg == 1) {
+        $lastid = $room->getId();
+        break;
+    }
+endforeach;
+if (($edit)) {
+    $lastid = $quoteEditData['room_id'];
+}
+$room_qty = Mage::getResourceModel('reservation/roomtypes')->getHotelrooms($_product->getId(), $lastid);
+$currenttimestamp = strtotime(date("Y-m-d", Mage::getModel('core/date')->timestamp(time())));
+if (isset($room_qty['room_period_from'])) {
+    $fromtimestamp = strtotime($fromDate);
+}
+if ($currenttimestamp > $fromtimestamp) {
+    $fromdate = date("Y-m-d", Mage::getModel('core/date')->timestamp(time()));
+}
+
+$today = Apptha_Reservation_Helper_Data::currentDate();
+$_activeFrom = Apptha_Reservation_Helper_Data::getDays($today, $_product->getAppthaHotelPeriodFrom());
+$_activeTo = Apptha_Reservation_Helper_Data::getDays($today, $_product->getAppthaHotelPeriodTo());
+?>
+<!-- Loading image content starts here -->
+<div style="display: none;" id="loading-mask">
+    <p id="loading_mask_loader" class="loader">
+        <img alt="Loading..." src="<?php echo $this->getSkinUrl('apptha_reservation/images/ajax-loader-tr.gif'); ?>"/>
+        <br/><?php echo $this->__('Kindly be patient until we check room availability ...') ?>
+    </p>
+</div>
+<div style="display: none;" id="loading-mask-cart">
+    <p id="loading_mask_loader" class="loader">
+        <img alt="Loading..." src="<?php echo $this->getSkinUrl('apptha_reservation/images/ajax-loader-tr.gif'); ?>"/>
+        <br/><?php echo $this->__('Redirecting to cart, Please be patient...') ?></p>
+</div>
+<!-- Loading image content ends here -->
+
+<script type="text/javascript">
+    var optionsPrice = new Product.OptionsPrice(<?php echo $this->getJsonConfig() ?>);
+</script>
+<!-- Message display starts here -->
+<div id="messages_product_view"><?php echo $this->getMessagesBlock()->getGroupedHtml() ?></div>
+<!-- Message display starts here -->
+<!-- Product info displays here-->
+<div class="product-view">
+    <div class="page-title">
+        <h2><?php echo $_helper->productAttribute($_product, $_product->getName(), 'name') ?></h2>
+    </div>
+    <div>
+    <div class="main_image">
+        <img src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->constrainOnly(TRUE)->keepAspectRatio(TRUE)->keepFrame(FALSE)->resize(360,300); ?>" />
+    </div>
+    <div class="overview">
+        <span class="span-overview font-bold"><?php echo $this->__('Address') ?>:</span>
+        <p class="address"><?php echo $_product->getAppthaHotelAddress(); ?></p>
+        <div class="email">
+            <ul>
+                <li class="clearfix">
+                    <span class="span-overview font-bold"><?php echo $this->__('Email') ?>:</span>
+                    <span class="span-value">
+                        <?php $mail = "mailto:" . $_product->getAppthaHotelEmail() . "?subject=" . $_product->getName(); ?>
+                        <a class="span-value" href="<?php echo $mail; ?>"><?php echo $_product->getAppthaHotelEmail(); ?></a>
+                    </span>                    
+                </li>
+                <?php if ($_product->getAppthaHotelWebsite()): ?>
+                <li class="clearfix">
+                    <span class="span-overview font-bold"><?php echo $this->__('Website') ?>:</span>
+                    <span class="span-value">
+                        <a class="span-value" target="_blank" href="<?php echo $_product->getAppthaHotelWebsite(); ?>"><?php echo $_product->getAppthaHotelWebsite(); ?></a>
+                    </span>
+                </li>
+                <?php endif; ?>
+                <?php if ($_product->getAppthaHotelContactNo()): ?>
+                    <li><span class="span-overview font-bold"><?php echo $this->__('Contact') ?>:</span>
+                        <span class="span-value"><?php echo $_product->getAppthaHotelContactNo(); ?></span>
+                    </li>
+                <?php endif; ?>
+                 <?php if ($_product->getAppthaHotelFaxNo()): ?>
+                                    <li><span class="span-overview font-bold"><?php echo $this->__('Fax No') ?>:</span>
+                                        <span class="span-value"><?php echo $_product->getAppthaHotelFaxNo(); ?></span>
+                                    </li>
+                <?php endif; ?>
+                               
+            </ul>
+        </div>
+        <div class="time">
+            <ul>
+                <li><span class="span-overview rooms-span font-bold"><?php echo $this->__('Check-In') ?>:</span>
+                    <span class="span-value"><?php echo $_product->getAppthaHotelCheckIn(); ?></span>
+                </li>
+                <li><span class="span-overview font-bold"><?php echo $this->__('Check-Out') ?>:</span>
+                    <span class="span-value"> <?php echo $_product->getAppthaHotelCheckOut(); ?></span>
+                </li>
+            </ul>
+        </div>
+        <div class="parking">
+            <ul>
+                <li>
+                    <span class="span-overview rooms-span font-bold"><?php echo $this->__('Internet') ?>:</span>
+                    <span class="span-value">
+                    <?php
+                        if ($_product->getAppthaHotelInternet()):
+                            echo $this->__('Yes');
+                        else:
+                            echo $this->__('No');
+                        endif;
+                    ?>                        
+                    </span>
+                </li>
+                <li>
+                    <span class="span-overview font-bold"><?php echo $this->__('Parking') ?>:</span>
+                    <span class="span-value">
+                    <?php
+                        if ($_product->getAppthaHotelParking()):
+                            echo $this->__('Yes');
+                        else:
+                            echo $this->__('No');
+                        endif;
+                    ?>                        
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+        <div class="clear"></div>
+    </div>
+    <div class="galleryDiv" id="gallery">
+        <fieldset class="gallery">
+            <div class="product-img-box">
+                <?php echo $this->getChildHtml('media') ?>
+            </div>
+        </fieldset>
+    </div>
+    <div class="overview" style="display:none;">
+    <?php if ($_product->getAppthaHotelSlogan()): ?>
+            <div class="slogan"><?php echo $_product->getAppthaHotelSlogan(); ?></div>
+    <?php endif; ?>
+        <div class="time">
+            <ul>
+                <li><span class="span-overview rooms-span font-bold"><?php echo $this->__('Check-In') ?>:</span>
+                    <span class="span-value"><?php echo $_product->getAppthaHotelCheckIn(); ?></span>
+                </li>
+                <li><span class="span-overview font-bold"><?php echo $this->__('Check-Out') ?>:</span>
+                    <span class="span-value"> <?php echo $_product->getAppthaHotelCheckOut(); ?></span>
+                </li>
+            </ul>
+        </div>
+        <div class="parking">
+            <ul>
+                <li><span class="span-overview rooms-span font-bold"><?php echo $this->__('Internet') ?>:</span>
+                    <span class="span-value">
+                        <?php
+                            if ($_product->getAppthaHotelInternet()):
+                                echo $this->__('Yes');
+                            else:
+                                echo $this->__('No');
+                            endif;
+                        ?>
+                     </span>
+                </li>
+                <li><span class="span-overview font-bold"><?php echo $this->__('Parking') ?>:</span>
+                    <span class="span-value"><?php
+                        if ($_product->getAppthaHotelParking()):
+                            echo $this->__('Yes');
+                        else:
+                            echo $this->__('No');
+                        endif;
+        ?></span>
+                </li>
+            </ul>
+        </div>
+        <div class="email">
+            <ul>
+                <li class="clearfix"><span class="span-overview font-bold"><?php echo $this->__('Email') ?>:</span>
+                    <span class="span-value">
+<?php $mail = "mailto:" . $_product->getAppthaHotelEmail() . "?subject=" . $_product->getName(); ?>
+                        <a class="span-value" href="<?php echo $mail; ?>"><?php echo $_product->getAppthaHotelEmail(); ?></a>
+                    </span>
+                </li>
+                 <?php if ($_product->getAppthaHotelWebsite()): ?>
+                <li class="clearfix">
+                    <span class="span-overview font-bold"><?php echo $this->__('Website') ?>:</span>
+                    <span class="span-value">
+                        <a class="span-value" target="_blank" href="<?php echo $_product->getAppthaHotelWebsite(); ?>"><?php echo $_product->getAppthaHotelWebsite(); ?></a>
+                    </span>
+                </li>
+                <?php endif; ?>
+                <?php if ($_product->getAppthaHotelContactNo()): ?>
+                    <li><span class="span-overview font-bold"><?php echo $this->__('Contact') ?>:</span>
+                        <span class="span-value"><?php echo $_product->getAppthaHotelContactNo(); ?></span>
+                    </li>
+                <?php endif; ?>
+                 <?php if ($_product->getAppthaHotelFaxNo()): ?>
+                    <li><span class="span-overview font-bold"><?php echo $this->__('Fax No') ?>:</span>
+                        <span class="span-value"><?php echo $_product->getAppthaHotelFaxNo(); ?></span>
+                    </li>
+                <?php endif; ?>
+                <li class="clearfix"><span class="span-overview font-bold"><?php echo $this->__('Website') ?>:</span>
+                    <span class="span-value">
+                        <a class="span-value" target="_blank" href="<?php echo $_product->getAppthaHotelWebsite(); ?>"><?php echo $_product->getAppthaHotelWebsite(); ?></a></span>
+                </li>
+                
+            </ul>
+        </div>
+
+
+        <div class="clear"></div>
+    </div>
+    <div class="clearfix"></div>
+    <!-- Pop up Content starts here -->
+    <div id="booking-details" class="no-display" title="<?php echo $this->__('Book this room now') ?>">
+        <form action="<?php echo $this->getSubmitUrl($_product) ?>" title="Book this room now" method="post" name="product_addtocart_form" id="product_addtocart_form" <?php if ($_product->getOptions()): ?> enctype="multipart/form-data"<?php endif; ?>>
+            <div class="no-display">
+                    <input type="hidden" name="product" id="product" value="<?php echo $_product->getId() ?>" />
+                    <input type="hidden" name="roomtype" id="roomtype" value="<?php echo ($edit) ? $quoteEditData['room_id'] : $roomType ?>" />
+                    <input type="hidden" name="qty" value="<?php echo ($edit) ? $quoteEditData['rooms'] : '' ?>" />
+                    <input type="hidden" id="buyprice" name="buyprice" value="<?php echo $buyPrice ?>" />
+                    <input type="hidden" name="quoteId" id="related-products-field" value="<?php echo $quoteId; ?>" />
+                    <input type="hidden" name="cust_price" id="cust_price" value="" />
+                </div>
+            <div class="booking-details"> 
+                
+
+<?php
+if ($isRoomsAvail):
+    $i = 1;
+    $rowCount = count($rooms);
+    foreach ($rooms as $room):
+        if ($room->getRoomSpecialPrice()):$buyPrice = $room->getRoomSpecialPrice();
+        else: $buyPrice = $room->getRoomPricePerNight();
+        endif;
+        ?>
+
+
+        <?php if ($i == 1): ?>
+                            <script type="text/javascript">
+                                // var jq = jQuery.noConflict();
+                                jQuery(function(jq){
+                                    jq('#buyprice').val(<?php echo $buyPrice; ?>);
+                                    jq('#roomtype').val(<?php echo $room->getId(); ?>);
+                                });
+                            </script>
+            <?php
+        endif;
+        $i++;
+    endforeach;
+endif;
+?>
+                <div class="check-in-out">
+                    <ul>
+                        <li class="clearfix"><span class="check-in-span"><?php echo $this->__('Check-in') ?>:</span>
+                            <input class="booking-input" type="text" readonly="readonly" name="check-in" id="check-in" value="<?php echo ($edit) ? $quoteEditData['period_from'] : ''; ?>" />
+                            <input autofocus type="hidden" name="check-in-hidden" id="check-in-hidden" value="<?php echo $fromdate; ?>"/>
+                        </li>
+                        <li class="clearfix"><span><?php echo $this->__('Check-out') ?>:</span>
+                            <input class="booking-input" type="text" readonly="readonly" name="check-out" id="check-out" value="<?php echo ($edit) ? $quoteEditData['period_to'] : ''; ?>" />
+                            <input type="hidden" name="check-out-hidden" id="check-out-hidden" value="<?php echo $toDate; ?>"/>
+                        </li>                        
+                    </ul>
+                </div>
+                <div class="rooms">
+                    <ul>
+                        <li><span class="rooms-span"><?php echo $this->__('No of Rooms') ?>:</span>
+                            <select name="rooms" id="rooms" class="booking-select"><!-- onchange="moreRooms(this.value);" -->
+<?php
+$roomEdit = ($edit) ? $quoteEditData['rooms'] : '';
+for ($i = 1; $i <= ($room_qty['room_quantity']); $i++):
+    ?>
+                                    <option value ="<?php echo $i; ?>" <?php if ($i == $roomEdit): ?> selected="selected" <?php endif; ?>><?php echo $i; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                            <input type="text" name="more-rooms" id="more-rooms" style="display:none;"  />
+                        </li>
+                        <li><span><?php echo $this->__('No of Guests') ?>:</span>
+                            <select name="guests" id="guests" class="booking-select"><!-- onchange="moreGuests(this.value);" -->
+<?php
+$guests = ($edit) ? $quoteEditData['guests'] : '';
+for ($j = 1; $j <= ($roomPrice[0]['guests']); $j++):
+    ?>
+                                    <option value ="<?php echo $j; ?>" <?php if ($j == $guests): ?> selected="selected" <?php endif; ?>><?php echo $j; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                            <input type="text" name="more-guests" id="more-guests" style="display:none;" />
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="clear"></div>
+                <div id="check-validation"></div>
+            </div>
+<?php if ($_product->isSaleable() && $this->hasOptions()): ?>
+                <?php echo $this->getChildChildHtml('container2', '', true, true) ?>
+            <?php endif; ?>
+
+            <?php if ($_product->isSaleable() && $this->hasOptions()): ?>
+                <?php echo $this->getChildChildHtml('container1', '', true, true) ?>
+            <?php endif; ?>
+        </form>
+    </div>
+    <!-- Pop up Content ends here -->
+    <form action="" title="Book this room now" method="post" name="product_availability_form" id="product_availability_form" <?php if ($_product->getOptions()): ?> enctype="multipart/form-data"<?php endif; ?>>
+       <div class="no-display">
+                <input type="hidden" name="product" id="product" value="<?php echo $_product->getId() ?>" />
+                <input type="hidden" name="roomtype" id="roomtype" value="<?php echo ($edit) ? $quoteEditData['room_id'] : $roomType ?>" />
+                <input type="hidden" name="qty" value="<?php echo ($edit) ? $quoteEditData['rooms'] : '' ?>" />
+                <input type="hidden" id="buyprice" name="buyprice" value="<?php echo $buyPrice ?>" />
+                <input type="hidden" name="quoteId" id="related-products-field" value="<?php echo $quoteId; ?>" />
+            </div>
+        <div class="booking-details" style="display:none;">
+            
+            <h4>Rooms</h4>
+            <div  class="roomtype">
+
+                <ul>
+<?php
+if ($isRoomsAvail):
+    $i = 1;
+    $rowCount = count($rooms);
+    foreach ($rooms as $room):
+        if ($room->getRoomSpecialPrice()):$buyPrice = $room->getRoomSpecialPrice();
+        else: $buyPrice = $room->getRoomPricePerNight();
+        endif;
+        ?>
+                            <li><input type="radio" name="roomtypeid" <?php if (($edit)) {
+                        if ($quoteEditData['room_id'] == $room->getId()) { ?>checked="checked" <?php }
+                       } else if ($i == 1) { ?>checked="checked"<?php } ?> class="roomtypeid" onClick="roomtypechange('<?php echo $room->getId(); ?>','<?php echo $buyPrice; ?>')" value="<?php echo $room->getId(); ?>" onchange="bindPrice('<?php echo $buyPrice; ?>','<?php echo $room->getId(); ?>',<?php echo $_product->getId(); ?>);"/>&nbsp;<?php echo $room->getRoomType() ?></li>
+
+                                       <?php if ($i == 1): ?>
+                                <script type="text/javascript">
+                                    jQuery(function(jq){
+                                    jq('#buyprice').val(<?php echo $buyPrice; ?>);
+                                    jq('#roomtype').val(<?php echo $room->getId(); ?>);
+                                    });
+                                </script>
+            <?php
+        endif;
+        $i++;
+    endforeach;
+endif;
+?>
+                </ul>
+            </div>
+            <div class="float:left;">
+                <div class="check-in-out">
+                    <ul>
+                        <li class="clearfix"><span class="check-in-span"><?php echo $this->__('Check-in') ?>:</span>
+                            <input class="booking-input required-entry" type="text" readonly="readonly" name="check-in-book" id="check-in-book" value="<?php echo ($edit) ? $quoteEditData['period_from'] : ''; ?>" />
+
+                        </li>
+                        <li class="clearfix"><span><?php echo $this->__('Check-out') ?>:</span>
+                            <input class="booking-input required-entry" type="text" readonly="readonly" name="check-out-book" id="check-out-book" value="<?php echo ($edit) ? $quoteEditData['period_to'] : ''; ?>" />
+
+
+                        </li>
+                    </ul>
+                </div>
+                <div class="rooms">
+                    <ul>
+                        <li><span class="rooms-span"><?php echo $this->__('No of Rooms') ?>:</span>
+
+<?php ?>
+                            <select name="rooms-book" id="rooms-book" class="booking-select"><!-- onchange="moreRooms(this.value);" -->
+                            <?php
+                            $roomEdit = ($edit) ? $quoteEditData['rooms'] : '';
+                            for ($i = 1; $i <= $room_qty['room_quantity']; $i++):
+                                ?>
+                                    <option value ="<?php echo $i; ?>" <?php if ($i == $roomEdit): ?> selected="selected" <?php endif; ?>><?php echo $i; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                            <input type="text" name="more-rooms" id="more-rooms" style="display:none;"  />
+                        </li>
+                        <li><span><?php echo $this->__('No of Guests') ?>:</span>
+                            <select name="guests-book" id="guests-book" class="booking-select">
+
+<?php
+//$guests = ($edit)?$quoteEditData['guests']:'';
+for ($j = 1; $j <= $room_qty['room_capacity']; $j++):
+    ?>
+                                    <option value ="<?php echo $j; ?>" <?php if ($j == $guests): ?> selected="selected" <?php endif; ?>><?php echo $j; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                            <input type="text" name="more-guests" id="more-guests" style="display:none;" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="clear"></div>
+            <div class="chkavail">
+                <ul>
+                    <li>
+<?php //if ($_product->isSaleable()):  ?>
+                        <button id="getBookingDetails" onclick="productAvailabilityForm.submit(this,'','<?php echo $_product->getId(); ?>')" class="scalable task button" title="<?php echo $this->__('Check Availability') ?>" type="button" id="book">
+                            <span><span><?php echo $this->__('Check Availability') ?></span></span>
+                        </button>
+<?php //else:  ?>
+<!--                            <p class="availability out-of-stock"><span><?php echo $this->__('No booking(s) today') ?></span></p>-->
+                        <?php //endif;  ?>
+                    </li>
+                </ul>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+
+
+        <div class="clear"></div>
+
+    </form>
+
+    <div class="roomsDiv" id="">
+        <div class="roomtype-heading"><h4><?php echo $this->__('Rooms') ?></h4></div>
+        <table cellspacing="0" id="productsOrderedGrid_table" style="border:0;">
+            <colgroup>
+                <col>
+                <col width="200">
+                <col width="150">
+                <!-- <col width="120"> -->
+                <col width="100">
+            </colgroup>
+            <thead>
+                <tr class="headings">
+                    <th class=" no-link"><span class="nobr"><?php echo $this->__('Name') ?></span></th>
+                    <th class=" no-link"><span class="nobr"><?php echo $this->__('Inclusions') ?></span></th>
+                    <th class=" no-link"><span class="nobr"><?php echo $this->__('Price') ?></span></th>
+                        <!-- <th class=" no-link"><span class="nobr"><?php echo $this->__('Rooms') ?></span></th> -->
+                    <th class=" no-link last"><span class="nobr"></span></th>
+                </tr>
+            </thead>
+            <tbody>
+<?php
+if ($isRoomsAvail):
+    $i = 1;
+    $rowCount = count($rooms);
+
+    $flag = 1;
+    foreach ($rooms as $room):
+        $row = ($i % 2 == 0) ? 'even' : '';
+        $special = Apptha_Reservation_Helper_Data::checkIsSpecial($room->getRoomPeriodFrom(), $room->getRoomPeriodTo());
+        if ($room->getRoomSpecialPrice()):
+            $buyPrice = $room->getRoomSpecialPrice();
+        else: $buyPrice = $room->getRoomPricePerNight();
+        endif;
+        if ($room->getRoomQuantity()):
+            ?>
+                            <tr class="<?php echo $row; ?> <?php if (($edit)):echo ($quoteEditData['room_id'] == $room->getId()) ? 'editSelected' : '';
+                endif; ?>">
+                                <td class="a-left roomname"><?php echo $room->getRoomType() ?></td>
+                                <td class="a-center">
+                                <?php $inclusions = explode(',', $room->getInclusions()); ?>
+                                    <ul >
+                                    <?php if ($room->getInclusions() != '') {
+                                        foreach ($inclusions as $inclusion): ?>
+                                                <li><?php echo $inclusion; ?></li>
+                                                <?php
+                                            endforeach;
+                                        }else {
+                                            ?>
+                                            <li ><?php echo $this->__('No inclusions'); ?></li>
+                                        <?php } ?>
+                                    </ul>
+                                </td>
+                                <td class="a-center bookit">
+            <?php
+            if ($room->getRoomSpecialPrice()):
+                ?>
+                                        <p class="old-price">
+                                            <span class="price"><?php echo $_coreHelper->currency($room->getRoomPricePerNight(), true, false); ?></span>
+                                        </p>
+                                        <p class="special-price">
+                                            <span class="price"><?php echo $_coreHelper->currency($room->getRoomSpecialPrice(), true, false); ?></span>
+                                        </p>
+            <?php else: ?>
+                                        <p class="original-price">
+                                            <span class="price"><?php echo $_coreHelper->currency($room->getRoomPricePerNight(), true, false); ?></span>
+                                        </p>
+            <?php endif; ?>
+
+                                </td>
+                               <!--  <td class="a-center"><?php //echo $room->getRoomQuantity()   ?></td> -->
+                                <td class="last a-center bookit">
+            <?php //if ($_product->isSaleable()):  ?>
+                                    <button id="getBookingDetails" style="" onclick="productAddToCartForm.submit(this,'','<?php echo $room->getId(); ?>','<?php echo $buyPrice; ?>')" class="scalable task button" title="<?php echo $this->__('Book this room') ?>" type="button" id="book">
+                                        <span><span><span><?php echo $this->__('Book this room') ?></span></span></span>
+                                    </button>
+            <?php //else:  ?>
+            <!--                                        <p class="availability out-of-stock"><span><?php echo $this->__('No booking(s) today') ?></span></p>-->
+                                    <?php //endif;  ?>
+                                </td>
+                            </tr>
+                                    <?php
+                                endif;
+                                $i++;
+
+                            endforeach;
+                        else:
+                            ?>
+
+                    <tr class="even">
+                        <td colspan="100" class="empty-text a-center">No rooms available for booking.</td>
+                    </tr>
+<?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="clearfix">&nbsp;</div>
+<?php echo $this->getChildHtml('upsell_products') ?>
+    <div class="clearfix"></div>
+    <div class="overview over-bottom" style="width:673px;">
+        <div class="short-desc">
+            <h2><?php echo $this->__('Overview') ?></h2>
+<?php echo $_product->getShortDescription() ?></div>
+        <div class="facilities-amenities">
+            <div class="facilities">
+                <h6><?php echo $this->__('Facilities') ?></h6>
+<?php if ($_product->getAppthaHotelFacilites() != '') {
+    $facilities = explode(',', $_product->getAppthaHotelFacilites()); ?>
+                    <ul>
+                    <?php foreach ($facilities as $facility): ?>
+                            <li><?php echo $facility; ?></li>
+                        <?php endforeach;
+                    }else { ?>
+
+                        <li style="list-style:none;"><?php echo $this->__('No facilities mentioned'); ?></li>
+                    <?php } ?>
+                </ul>
+            </div>
+            <div class="clear">&nbsp;</div>
+            <div class="amenities">
+                <div class="address">
+                    <ul class="top-ul">
+                        <li class="clearfix">
+                            <span class="span-overview font-bold"><?php echo $this->__('Email') ?>:</span>
+                            <span class="span-value">
+                                <?php $mail = "mailto:" . $_product->getAppthaHotelEmail() . "?subject=" . $_product->getName(); ?>
+                                <a class="span-value" href="<?php echo $mail; ?>"><?php echo $_product->getAppthaHotelEmail(); ?></a>
+                            </span>                    
+                        </li>
+                        
+                 <?php if ($_product->getAppthaHotelWebsite()): ?>
+                <li class="clearfix">
+                    <span class="span-overview font-bold"><?php echo $this->__('Website') ?>:</span>
+                    <span class="span-value">
+                        <a class="span-value" target="_blank" href="<?php echo $_product->getAppthaHotelWebsite(); ?>"><?php echo $_product->getAppthaHotelWebsite(); ?></a>
+                    </span>
+                </li>
+                <?php endif; ?>
+                
+                 <?php if ($_product->getAppthaHotelFaxNo()): ?>
+                    <li><span class="span-overview font-bold"><?php echo $this->__('Fax No') ?>:</span>
+                        <span class="span-value"><?php echo $_product->getAppthaHotelFaxNo(); ?></span>
+                    </li>
+                <?php endif; ?>
+                        
+                         <li>
+                            <span class="span-overview font-bold"><?php echo $this->__('City') ?>:</span>
+                            <?php echo $_product->getAttributeText('apptha_hotel_city'); ?>
+                        </li>
+                         <li>
+                            <span class="span-overview font-bold"><?php echo $this->__('Country') ?>:</span>
+                            <?php echo $_product->getAttributeText('apptha_hotel_country'); ?>
+                        </li>
+                            <?php if ($_product->getAppthaHotelPostalCode()): ?>
+                            <li>
+                                <span class="span-overview font-bold"><?php echo $this->__('Zip Code') ?>:</span>
+                                <span class="span-value">
+                                <?php echo $_product->getAppthaHotelPostalCode(); ?></span>
+                            </li>
+                            <?php if ($_product->getAppthaHotelContactNo()): ?>
+                    <li><span class="span-overview font-bold"><?php echo $this->__('Contact No') ?>:</span>
+                        <span class="span-value"><?php echo $_product->getAppthaHotelContactNo(); ?></span>
+                    </li>
+                <?php endif; ?>
+                        </ul>
+                                <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="clear"></div>
+    </div>
+        <div class="map">
+            <?php echo $_product->getAppthaHotelMap(); ?>
+        </div>
+    <div class="product-collateral">
+<?php echo $this->getChildHtml('description') ?>
+        <div class="clear">&nbsp;</div>
+        <?php echo $this->getChildHtml('product_additional_data_review') ?>
+        <?php echo $this->getChildHtml('product_additional_data') ?>
+    </div>
+    <div class="clear">&nbsp;</div>
+    <div class="product-collateral">
+        <h2><?php echo $this->__('Terms & Conditions') ?></h2>
+<?php echo $_product->getAppthaHotelTermsConditions() ?>
+    </div>
+</div>
+<!-- Product info display ends here-->
+
+<script type="text/javascript">
+     function roomtypechange(idval,priceval){      
+         
+            document.getElementById('roomtype').value = idval;
+            document.getElementById('buyprice').value = priceval;
+        }
+   jQuery(document).ready(function(jq){
+    function bindPrice(price, id,pid){
+       
+        jq('#buyprice').val(price);
+        //Element.show('loading-mask');
+        jq.ajax({
+            url: "<?php echo Mage::getBaseUrl(); ?>reservation/index/roomtype",
+            data: 'p_Id='+pid+'&r_type='+id,
+            dataType: 'json',
+            success: function(data){
+
+                Element.hide('loading-mask');
+                jq("#rooms-book").html(data.a);
+                jq("#guests-book").html(data.b);
+                jq("#rooms").html(data.a);
+                jq("#guests").html(data.b);
+               
+                jq( "#check-in-book, #check-out-book" ).datepicker( "option" , {
+                    minDate: data.c,
+                    maxDate: data.d} );
+
+
+                jq( "#check-in, #check-out" ).datepicker( "option" , {
+                    minDate: data.c,
+                    maxDate: data.d} );
+            }
+
+        });
+
+
+    }
+   
+    jq('#roomtype').val(<?php $roomType = '';
+echo ($edit) ? $quoteEditData['room_id'] : $roomType ?>);
+    jq(function() {
+
+        dates = jq( "#check-in, #check-out" ).datepicker({
+            
+            minDate: jq('#check-in-hidden').val(),
+            dateFormat:'yy-mm-dd',
+            maxDate: jq('#check-out-hidden').val(),
+            numberOfMonths: 1,
+            onSelect: function( selectedDate ) {
+                var option = this.id == "check-in" ? "minDate" : "maxDate",
+                instance = jq( this ).data( "datepicker" ),
+                date = jq.datepicker.parseDate(
+                instance.settings.dateFormat ||
+                    jq.datepicker._defaults.dateFormat,
+                selectedDate, instance.settings );
+              dates.not( this ).datepicker( "option", option, date );
+            }
+        });
+
+        dates1 = jq( "#check-in-book, #check-out-book" ).datepicker({
+            
+            minDate: 0 ,
+           
+            dateFormat:'yy-mm-dd',
+            maxDate: <?php echo $_activeTo; ?>,
+
+            mode: 'range',
+
+            onSelect: function( selectedDate ) {
+
+                var option = this.id == "check-in-book" ? "minDate" : "maxDate",
+                instance = jq( this ).data( "datepicker" ),
+                date = jq.datepicker.parseDate(
+                instance.settings.dateFormat ||
+                    jq.datepicker._defaults.dateFormat,
+                selectedDate, instance.settings );
+                dates1.not( this ).datepicker( "option", option, date );
+            }
+        });
+
+
+    });
+    });
+
+</script>
+<div id="dialog-message" title="Error!!" class="no-display">
+
+</div>
+<div id="dialog-confirm" title="Rooms Available!" class="no-display">
+    <p>
+<?php echo $this->__('Congrats! Rooms available.') ?>
+    </p>
+</div>
+
+<script type="text/javascript">
+    var productAddToCartForm = new VarienForm('product_addtocart_form');
+    productAddToCartForm.submit = function(button, url, roomType , price) {
+
+        //setTimeout(function(){bindPrice(price, roomType,<?php echo $_product->getId(); ?> )},600);
+       
+        jq('#roomtype').val('');
+        var form = this.form;
+        var roomTypeBook = roomType;
+        var buyPrice = price;
+        var rooms = form.rooms.value;
+        form.roomtype.value = roomType;
+        jq('#roomtype').val(roomTypeBook);
+        jq('#qty').val(rooms);
+        jq('#buyprice').val(buyPrice);
+        jq('#check-validation').html('');
+        jq("#check-in").val();
+        jq("#check-out").val();
+        jq('#loading-mask').hide();
+        
+        var $dialog = jq( "#booking-details" ).dialog({
+           
+            resizable: false,
+            width:400,
+            modal: true,
+            buttons: {
+                "Book now!!": function() {
+                    try {    
+                        jq('#roomtype').val(roomTypeBook);
+                        jq('#buyprice').val(buyPrice);
+                        jq('#check-validation').html();
+                        //Element.show('loading-mask');
+                        var checkIn = jq("#check-in").val();
+                        var checkOut = jq("#check-out").val();
+                    
+                        if(checkIn=='' || checkOut=='')
+                        {
+                            jq('#check-validation').addClass("failed");
+                            jq('#check-validation').html('<?php echo $this->__('Kindly enter Check-in Check-out dates'); ?>');
+                            return false;
+                        }
+                        
+                        var product = <?php echo $_product->getId() ?>;
+                        var rooms = jq("#rooms").val();
+                        var guests = jq("#guests").val();
+                        var ajaxObj1 = jq.ajax({
+                            url: "<?php echo Mage::getBaseUrl(); ?>reservation/hotel/bookingavailability",
+                            data: "from="+checkIn+"&to="+checkOut+"&product="+product+"&roomtype="+roomTypeBook+"&rooms="+rooms+"&guests="+guests+"&quote_order=<?php echo $quoteId; ?>",
+                            success: function(data){
+                                jq('#loading-mask').hide();
+                                var obj = jQuery.parseJSON(data);
+
+                                if(obj.status){
+                                    $dialog.dialog( "close" );
+                                    Element.hide('loading-mask');
+                                    jq('#product_addtocart_form').submit();
+
+                                }else{
+                                    jq("#dialog-message").html(obj.msg);
+                                    jq( "#dialog:ui-dialog" ).dialog( "destroy" );
+                                    Element.hide('loading-mask');
+                                    jq( "#dialog-message" ).dialog({
+                                        modal: true,
+                                        buttons: {
+                                            Ok: function() {
+                                                jq( this ).dialog( "close" );
+                                            }
+                                        }
+                                    });
+                                }
+                            },
+                            error:function(){
+                                alert('Error occured! Please try again::'+e);
+                            }
+                        });
+
+                    } catch (e) {
+                        alert('Error occured! Please try again:'+e);
+                    }
+                },
+                Cancel: function() {
+                    jq( this ).dialog( "close" );
+                }
+            }
+        });
+
+
+        if (this.validator.validate()) {
+            var form = this.form;
+        }
+
+    }.bind(productAddToCartForm);
+
+    productAddToCartForm.submitLight = function(button, url){
+        if(this.validator) {
+            var nv = Validation.methods;
+            delete Validation.methods['required-entry'];
+            delete Validation.methods['validate-one-required'];
+            delete Validation.methods['validate-one-required-by-name'];
+            if (this.validator.validate()) {
+                if (url) {
+                    this.form.action = url;
+                }
+                this.form.submit();
+            }
+            Object.extend(Validation.methods, nv);
+        }
+    }.bind(productAddToCartForm);
+
+    var productAvailabilityForm = new VarienForm('product_availability_form');
+    productAvailabilityForm.submit = function(button,url, id) {
+        if (this.validator.validate()) {
+            Element.show('loading-mask');
+            var checkIn = jq("#check-in-book").val();
+            var checkOut = jq("#check-out-book").val();
+            var product = id;
+            var roomtype= jq('input:radio[name=roomtypeid]:checked').val();
+            var rooms = jq("#rooms-book").val();
+            var guests = jq("#guests-book").val();
+            var ajaxObj = jq.ajax({
+                url: "<?php echo Mage::getBaseUrl(); ?>reservation/hotel/bookingavailability",
+                data: "from="+checkIn+"&to="+checkOut+"&product="+product+"&roomtype="+roomtype+"&rooms="+rooms+"&guests="+guests+"&quote_order=<?php echo $quoteId; ?>",
+                success: function(data){
+    
+                    var obj = jQuery.parseJSON(data);
+                    if(obj.status){
+                        jq( "#dialog:ui-dialog" ).dialog( "destroy" );
+                        Element.hide('loading-mask');
+                    
+                        jq('#check-in').val(checkIn);
+                    
+                        jq('#check-out').val(checkOut);
+
+                        jq('#rooms').val(rooms);
+
+                        jq('#guests').val(jq("#guests-book").val());
+
+                         
+                        jq( "#booking-details-rooms" ).show();
+                        var $dialog = jq( "#booking-details" ).dialog({
+                            
+                            resizable: false,
+                            width:400,
+                            modal: true,
+                            buttons: {
+                                "Book now!!": function() {
+                                    try {
+                                        jq('#roomtype').val(roomtype);
+
+                                        jq('#check-validation').html();
+                                        //Element.show('loading-mask');
+                                        var checkIn = jq("#check-in").val();
+                                        var checkOut = jq("#check-out").val();
+
+                                        if(checkIn=='' || checkOut=='')
+                                        {
+                                            jq('#check-validation').addClass("failed");
+                                            jq('#check-validation').html('<?php echo $this->__('Kindly enter Check-in Check-out dates'); ?>');
+                                            return false;
+                                        }
+                                        var product = <?php echo $_product->getId() ?>;
+                                        var rooms = jq("#rooms").val();
+                                        var guests = jq("#guests").val();
+                                        var ajaxObj1 = jq.ajax({
+                                            url: "<?php echo Mage::getBaseUrl(); ?>reservation/hotel/bookingavailability",
+                                            data: "from="+checkIn+"&to="+checkOut+"&product="+product+"&roomtype="+roomtype+"&rooms="+rooms+"&guests="+guests,
+                                            success: function(data){
+                                                var obj = jQuery.parseJSON(data);
+
+                                                if(obj.status){
+                                                    $dialog.dialog( "close" );
+                                                    Element.show('loading-mask-cart');
+                                                    jq('#product_addtocart_form').submit();
+
+                                                }else{
+                                                    jq("#dialog-message").html(obj.msg);
+                                                    jq( "#dialog:ui-dialog" ).dialog( "destroy" );
+                                                    Element.hide('loading-mask');
+                                                    jq( "#dialog-message" ).dialog({
+                                                        modal: true,
+                                                        buttons: {
+                                                            Ok: function() {
+                                                                jq( this ).dialog( "close" );
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            },
+                                            error:function(){
+                                                alert('Error occured! Please try again::'+e);
+                                            }
+                                        });
+
+                                    } catch (e) {
+                                        alert('Error occured! Please try again:'+e);
+                                    }
+                                },
+                                Cancel: function() {
+                                    jq( this ).dialog( "close" );
+                                }
+                            }
+                        });
+                        jq('#check-validation').addClass("passed");
+                        jq('#check-validation').html('<?php echo $this->__('The rooms available for currently selected dates.'); ?>');
+                    }else{
+                        jq("#dialog-message").html(obj.msg);
+                        jq( "#dialog:ui-dialog" ).dialog( "destroy" );
+                        Element.hide('loading-mask');
+                        jq( "#dialog-message" ).dialog({
+                            modal: true,
+                            buttons: {
+                                Ok: function() {
+                                    jq( this ).dialog( "close" );
+                                }
+                            }
+                        });
+                    }
+                },
+                error:function(){
+                    alert('<?php echo $this->__('Error occured! Please try again.'); ?>');
+                }
+            });return false;
+        }
+    }.bind(productAvailabilityForm);
+</script>
